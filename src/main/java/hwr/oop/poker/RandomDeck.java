@@ -27,7 +27,7 @@ public class RandomDeck implements Deck {
     @Override
     public Card topCard() {
         if (isEmpty()) {
-            throw new DrawFromEmptyDeckException("Cannot retrieve #topCard if Deck #isEmpty");
+            throw new DrawFromEmptyDeckException("Cannot peek at top Card if Deck #isEmpty");
         }
         return cards.get(0);
     }
@@ -35,7 +35,7 @@ public class RandomDeck implements Deck {
     @Override
     public void popFirstCard() {
         if (isEmpty()) {
-            throw new DrawFromEmptyDeckException("Cannot #popFirstCard if Deck #isEmpty");
+            throw new DrawFromEmptyDeckException("Cannot remove top card if Deck #isEmpty");
         }
         cards.remove(0);
     }
