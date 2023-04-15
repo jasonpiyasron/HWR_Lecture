@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CardEqualsTest {
 
     @Test
+    @DisplayName("same Color, different Symbol, not equal")
     void sameColorDifferentSymbol_NotEqual() {
         final Card tenOfHearts = new Card(Color.HEARTS, Symbol.TEN);
         final Card jackOfHearts = new Card(Color.HEARTS, Symbol.JACK);
@@ -16,6 +17,7 @@ class CardEqualsTest {
     }
 
     @Test
+    @DisplayName("different Color, same Symbol, not equal")
     void differentColorSameSymbol_NotEqual() {
         final Card tenOfHearts = new Card(Color.HEARTS, Symbol.TEN);
         final Card tenOfClubs = new Card(Color.CLUBS, Symbol.TEN);
@@ -23,6 +25,7 @@ class CardEqualsTest {
     }
 
     @Test
+    @DisplayName("different Color and Symbol, not equal")
     void differentColorDifferentSymbol_NotEqual() {
         final Card nineOfHearts = new Card(Color.HEARTS, Symbol.NINE);
         final Card tenOfClubs = new Card(Color.CLUBS, Symbol.TEN);
@@ -30,6 +33,7 @@ class CardEqualsTest {
     }
 
     @Test
+    @DisplayName("same Color and Symbol, is equal")
     void sameColorSameSymbol_Equal() {
         final Card first = new Card(Color.HEARTS, Symbol.TEN);
         final Card second = new Card(Color.HEARTS, Symbol.TEN);
