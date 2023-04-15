@@ -1,8 +1,6 @@
 package hwr.oop.poker;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.List;
 
@@ -83,4 +81,29 @@ class PlayingHandsWithTwoPlayersTest {
         final Player underTheGun = hand.underTheGun();
         assertThat(underTheGun).isSameAs(firstPlayer);
     }
+
+    @Test
+    @Disabled("Not yet implemented")
+    void positionalRelationsBetweenPlayers() {
+        Assertions.fail("Not yet implemented");
+    }
+
+    @Test
+    @Disabled("Not yet implemented")
+    void blindConfiguration() {
+        Assertions.fail("Not yet implemented");
+    }
+
+    @Test
+    @Disabled("Not yet implemented")
+    void stacksForPlayers() {
+        Assertions.fail("Not yet implemented");
+    }
+
+    @Test
+    @Disabled("Not yet implemented")
+    void turn_IsOnUnderTheGun() {
+        Assertions.fail("Not yet implemented");
+    }
+
 }
