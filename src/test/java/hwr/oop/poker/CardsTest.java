@@ -16,9 +16,9 @@ class CardsTest {
         final Symbol seven = Symbol.SEVEN;
         final Color expectedColor = Color.valueOf(colorString);
 
-        Card card = new Card(expectedColor, seven);
-        Color color = card.color();
-        Symbol number = card.number();
+        final Card card = new Card(expectedColor, seven);
+        final Color color = card.color();
+        final Symbol number = card.number();
 
         assertThat(color).isEqualTo(expectedColor);
         assertThat(number).isEqualTo(seven);
@@ -34,9 +34,9 @@ class CardsTest {
         final Symbol expectedNumber = Symbol.valueOf(numberString);
         final Color hearts = Color.HEARTS;
 
-        Card card = new Card(hearts, expectedNumber);
-        Color color = card.color();
-        Symbol number = card.number();
+        final Card card = new Card(hearts, expectedNumber);
+        final Color color = card.color();
+        final Symbol number = card.number();
 
         assertThat(color).isEqualTo(hearts);
         assertThat(number).isEqualTo(expectedNumber);

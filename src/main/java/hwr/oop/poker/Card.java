@@ -21,8 +21,12 @@ public class Card {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Card card = (Card) o;
         return color == card.color && number == card.number;
     }
@@ -30,5 +34,10 @@ public class Card {
     @Override
     public int hashCode() {
         return Objects.hash(color, number);
+    }
+
+    @Override
+    public String toString() {
+        return number.toString() + " of " + color.toString();
     }
 }
