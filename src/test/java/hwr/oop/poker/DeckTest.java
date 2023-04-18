@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class DeckTest {
 
     @Test
-    @DisplayName("new Deck, contains 52 cards")
+    @DisplayName("new Deck, contains each card exactly once")
     void newDeck_ContainsEachCardExactlyOnce() {
         final Deck deck = new RandomDeck();
         final List<Card> cards = deck.drawAllCards();
@@ -24,7 +24,7 @@ class DeckTest {
     }
 
     @Test
-    @DisplayName("new Deck, contains each card exactly once")
+    @DisplayName("new Deck, contains 52 cards")
     void newDeck_52Cards() {
         final Deck deck = new RandomDeck();
         final List<Card> cards = deck.drawAllCards();
