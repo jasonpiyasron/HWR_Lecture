@@ -1,5 +1,7 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.decks.RandomDeck;
+import hwr.oop.poker.decks.TestDoubleDeck;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

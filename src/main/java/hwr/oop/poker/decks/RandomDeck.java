@@ -1,13 +1,27 @@
-package hwr.oop.poker;
+package hwr.oop.poker.decks;
+
+import hwr.oop.poker.Card;
+import hwr.oop.poker.Color;
+import hwr.oop.poker.Deck;
+import hwr.oop.poker.Symbol;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class TestDoubleDeck implements Deck {
+public class RandomDeck implements Deck {
+
     private final List<Card> cards;
 
-    public TestDoubleDeck(Card... cards) {
-        this.cards = new ArrayList<>(List.of(cards));
+    public RandomDeck() {
+        this.cards = new ArrayList<>();
+        for (Color color : Color.values()) {
+            for (Symbol symbol : Symbol.values()) {
+                final Card card = new Card(color, symbol);
+                this.cards.add(card);
+            }
+        }
+        Collections.shuffle(cards);
     }
 
     @Override

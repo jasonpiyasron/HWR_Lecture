@@ -1,8 +1,18 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.blinds.BigBlind;
+import hwr.oop.poker.blinds.BlindConfiguration;
+import hwr.oop.poker.blinds.SmallBlind;
+import hwr.oop.poker.community.cards.CommunityCards;
+import hwr.oop.poker.community.cards.Flop;
+import hwr.oop.poker.community.cards.River;
+import hwr.oop.poker.community.cards.Turn;
+import hwr.oop.poker.decks.TestDoubleDeck;
 import org.junit.jupiter.api.*;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +41,11 @@ class PlayingHandsWithTwoPlayersTest {
         );
         firstPlayer = new Player("1");
         secondPlayer = new Player("2");
-        hand = new Hand(deck, List.of(firstPlayer, secondPlayer));
+        hand = Hand.newBuilder()
+                .deck(deck)
+                .players(List.of(firstPlayer, secondPlayer))
+                .smallBlind(SmallBlind.of(42))
+                .build();
     }
 
     @Test
@@ -83,25 +97,170 @@ class PlayingHandsWithTwoPlayersTest {
     }
 
     @Test
-    @Disabled("Not yet implemented")
+    @Disabled("Messages asking whether players have position on each other is not yet implemented")
     void positionalRelationsBetweenPlayers() {
         Assertions.fail("Not yet implemented");
     }
 
-    @Test
-    @Disabled("Not yet implemented")
-    void blindConfiguration() {
-        Assertions.fail("Not yet implemented");
+    @Nested
+    @DisplayName("has blinds: Small blind is 42, Big Blind is 84")
+    class BlindTest {
+        @Test
+        @DisplayName("Big Blind has the correct size (84)")
+        void bigBlind_IsEqualToTwo() {
+            BlindConfiguration blinds = hand.blinds();
+            BigBlind bigBlind = blinds.bigBlind();
+            long bigBlindValue = bigBlind.value();
+            assertThat(bigBlindValue)
+                    .isNotZero()
+                    .isEqualTo(84);
+        }
+
+        @Test
+        @DisplayName("Small Blind has the correct size, halve of the Big Blind")
+        void smallBlind_IsExactlyHalfOfTheBigBlind() {
+            final BlindConfiguration blinds = hand.blinds();
+            final long bigBlindValue = blinds.bigBlind().value();
+            final double expectedSmallBlind = 1.0 * bigBlindValue / 2;
+            final long actualSmallBlindValue = blinds.smallBlind().value();
+            assertThat(expectedSmallBlind)
+                    .isNotZero()
+                    .isEqualTo(actualSmallBlindValue);
+        }
+
+        @Test
+        @Disabled("Antes (mandatory costs for all players not paying blinds) are not yet supported")
+        void antes() {
+            Assertions.fail("Not yet implemented");
+        }
+    }
+
+    @Nested
+    @DisplayName("has Community Cards, however, none are dealt yet")
+    class CommunityCardsTest {
+        @Test
+        @DisplayName("Flop has not been dealt, is not present")
+        void flopIsEmptyBecauseItWasNotDealt() {
+            Optional<Flop> flop = hand.flop();
+            assertThat(flop).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("Turn has not been dealt, is not present")
+        void turnIsEmptyBecauseItWasNotDealt() {
+            Optional<Turn> turn = hand.turn();
+            assertThat(turn).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("River has not been dealt, is not present")
+        void riverIsEmptyBecauseItWasNotDealt() {
+            Optional<River> river = hand.river();
+            assertThat(river).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("no community cards dealt, response is empty collection")
+        void communityCardsAreEmptyBecauseItWasNotDealtYet() {
+            CommunityCards communityCards = hand.communityCards();
+            Collection<Card> cards = communityCards.cardsDealt();
+            assertThat(cards).isEmpty();
+        }
+
+        @Test
+        @Disabled("before start: four betting rounds missing, not yet implemented")
+        void beforeStart_FourMoreBettingRounds() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Pre Flop finished: Flop becomes visible, not yet implemented")
+        void preFlopFinished_FlopNoLongerEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Pre Flop finished: Turn is still hidden, not yet implemented")
+        void preFlopFinished_TurnIsStillEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Pre Flop finished: River is still hidden, not yet implemented")
+        void preFlopFinished_RiverIsStillEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Pre Flop finished: Three more betting rounds, not yet implemented")
+        void preFlopFinished_ThreeMoreBettingRound() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Flop finished: Turn becomes visible, not yet implemented")
+        void flopFinished_TurnNoLongerEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Flop finished: River is still hidden, not yet implemented")
+        void flopFinished_RiverIsStillEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Flop finished: Two more betting rounds, not yet implemented")
+        void flopFinished_TwoMoreBettingRound() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Turn finished: River becomes visible, not yet implemented")
+        void turnFinished_RiverNoLongerEmpty() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("Turn finished: One more betting rounds, not yet implemented")
+        void turnFinished_OneMoreBettingRound() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("River finished: All cards visible, not yet implemented")
+        void turnFinished_AllCommunityCardsVisible() {
+            Assertions.fail("Not yet implemented");
+        }
+
+        @Test
+        @Disabled("River finished: No more betting rounds, not yet implemented")
+        void riverFinished_NoMoreBettingRoundsRequired() {
+            Assertions.fail("Not yet implemented");
+        }
     }
 
     @Test
-    @Disabled("Not yet implemented")
+    @DisplayName("#podSize, is equal to sum of Small Blind and Big Blind")
+    void podSize_IsEqualToSumOfSmallBlindAndBigBlind() {
+        // given
+        final BlindConfiguration config = hand.blinds();
+        final long sbValue = config.smallBlind().value();
+        final long bbValue = config.bigBlind().value();
+        // when
+        final long podSize = hand.podSize().value();
+        // then
+        assertThat(podSize).isEqualTo(sbValue + bbValue);
+    }
+
+    @Test
+    @Disabled("Stacks for individual players are not yet implemented")
     void stacksForPlayers() {
         Assertions.fail("Not yet implemented");
     }
 
     @Test
-    @Disabled("Not yet implemented")
+    @Disabled("Message asking for the current player on action is not yet implemented")
     void turn_IsOnUnderTheGun() {
         Assertions.fail("Not yet implemented");
     }
