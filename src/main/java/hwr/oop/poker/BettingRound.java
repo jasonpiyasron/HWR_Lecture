@@ -59,7 +59,7 @@ public class BettingRound {
         }
     }
 
-    public ChipValue podSize() {
+    public ChipValue pot() {
         final Long sumOfAllPlays = plays.stream()
                 .map(Play::chipValue)
                 .map(ChipValue::value)
