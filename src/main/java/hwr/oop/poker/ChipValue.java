@@ -7,6 +7,18 @@ public interface ChipValue extends Comparable<ChipValue> {
         return new SimpleChipValue(value);
     }
 
+    static ChipValue zero() {
+        return ChipValue.of(0);
+    }
+
+    static ChipValue sum(ChipValue a, ChipValue b) {
+        return ChipValue.of(a.value() + b.value());
+    }
+
+    static ChipValue subtract(ChipValue a, ChipValue b) {
+        return ChipValue.of(a.value() - b.value());
+    }
+
     long value();
 
     @Override
