@@ -1,25 +1,26 @@
 package hwr.oop.poker;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class RoundInContext {
 
     private final Player player;
-    private final BettingRound bettingRound;
     private final Supplier<ChipValue> chipsPutIntoPotByPlayer;
     private final Supplier<Optional<Play>> lastChipCountIncreasingPlay;
+    private final Function<Play, BettingRound> bettingRound;
 
     public RoundInContext(Player player, BettingRound bettingRound) {
         this.player = player;
-        this.bettingRound = bettingRound;
         this.chipsPutIntoPotByPlayer = () -> bettingRound.chipsPutIntoPotBy(player);
         this.lastChipCountIncreasingPlay = bettingRound::lastChipCountIncreasingPlay;
+        this.bettingRound = bettingRound::nextState;
     }
 
     public BettingRound fold() {
         final Play play = Play.fold(player);
-        return bettingRound.nextState(play);
+        return bettingRound.apply(play);
     }
 
     public BettingRound check() {
@@ -30,7 +31,7 @@ public class RoundInContext {
             );
         }
         final Play play = Play.check(player);
-        return bettingRound.nextState(play);
+        return bettingRound.apply(play);
     }
 
     public BettingRound bet(int value) {
@@ -41,7 +42,7 @@ public class RoundInContext {
         } else {
             final ChipValue amount = ChipValue.of(value);
             final Play play = Play.bet(player, amount);
-            return bettingRound.nextState(play);
+            return bettingRound.apply(play);
         }
     }
 
@@ -52,7 +53,7 @@ public class RoundInContext {
         } else {
             final Play bettingPlay = lastIncreasingPlay.get();
             final Play play = playUsedToCall(bettingPlay);
-            return bettingRound.nextState(play);
+            return bettingRound.apply(play);
         }
     }
 
@@ -63,7 +64,7 @@ public class RoundInContext {
         } else {
             final ChipValue target = ChipValue.of(value);
             final Play play = playUsedToGetTo(target);
-            return bettingRound.nextState(play);
+            return bettingRound.apply(play);
         }
     }
 
