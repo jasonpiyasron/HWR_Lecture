@@ -1,5 +1,8 @@
-package hwr.oop.poker;
+package hwr.oop.poker.testing;
 
+import hwr.oop.poker.Card;
+import hwr.oop.poker.Color;
+import hwr.oop.poker.Symbol;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -11,15 +11,15 @@ public interface ChipValue extends Comparable<ChipValue> {
         return ChipValue.of(0);
     }
 
-    static ChipValue sum(ChipValue a, ChipValue b) {
-        return ChipValue.of(a.value() + b.value());
-    }
-
-    static ChipValue subtract(ChipValue a, ChipValue b) {
-        return ChipValue.of(a.value() - b.value());
-    }
-
     long value();
+
+    default ChipValue minus(ChipValue other) {
+        return ChipValue.of(value() - other.value());
+    }
+
+    default ChipValue plus(ChipValue other) {
+        return ChipValue.of(value() + other.value());
+    }
 
     @Override
     default int compareTo(ChipValue o) {

@@ -10,7 +10,6 @@ import hwr.oop.poker.community.cards.Turn;
 import java.util.*;
 
 public class Hand {
-    private final Deck deck;
     private final List<Player> players;
     private final Map<Player, List<Card>> holeCards;
     private final BlindConfiguration blindConfiguration;
@@ -20,7 +19,6 @@ public class Hand {
     }
 
     private Hand(Deck deck, List<Player> players, SmallBlind smallBlind) {
-        this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = new HashMap<>();

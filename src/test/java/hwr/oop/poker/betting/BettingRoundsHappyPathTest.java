@@ -1,5 +1,9 @@
-package hwr.oop.poker;
+package hwr.oop.poker.betting;
 
+import hwr.oop.poker.BettingRound;
+import hwr.oop.poker.ChipValue;
+import hwr.oop.poker.Play;
+import hwr.oop.poker.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,12 +12,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class BettingRoundsTest {
+class BettingRoundsHappyPathTest {
 
     private Player firstPlayer;
     private Player secondPlayer;
     private Player thirdPlayer;
-    private List<Player> players;
     private BettingRound round;
 
     @BeforeEach
@@ -21,7 +24,11 @@ class BettingRoundsTest {
         firstPlayer = new Player("1");
         secondPlayer = new Player("2");
         thirdPlayer = new Player("3");
-        players = List.of(firstPlayer, secondPlayer, thirdPlayer);
+        List<Player> players = List.of(
+                firstPlayer,
+                secondPlayer,
+                thirdPlayer
+        );
         round = new BettingRound(players);
     }
 

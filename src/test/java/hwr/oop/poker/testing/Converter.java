@@ -1,4 +1,8 @@
-package hwr.oop.poker;
+package hwr.oop.poker.testing;
+
+import hwr.oop.poker.Card;
+import hwr.oop.poker.Color;
+import hwr.oop.poker.Symbol;
 
 import java.util.Arrays;
 import java.util.Optional;

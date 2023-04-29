@@ -1,0 +1,115 @@
+package hwr.oop.poker.betting;
+
+import hwr.oop.poker.BettingRound;
+import hwr.oop.poker.Player;
+import hwr.oop.poker.RoundInContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class WrongPlaysOnBettingRoundsTest {
+
+    private Player firstPlayer;
+    private Player secondPlayer;
+    private Player thirdPlayer;
+    private BettingRound round;
+
+    @BeforeEach
+    void setUp() {
+        firstPlayer = new Player("1");
+        secondPlayer = new Player("2");
+        thirdPlayer = new Player("3");
+        List<Player> players = List.of(
+                firstPlayer,
+                secondPlayer,
+                thirdPlayer
+        );
+        round = new BettingRound(players);
+    }
+
+    @Test
+    void callBeforeBet_RaisesException() {
+        final RoundInContext first = round
+                .with(firstPlayer);
+
+        assertThatThrownBy(first::call)
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "Cannot CALL",
+                        "no BET to CALL/RAISE/FOLD on"
+                );
+    }
+
+    @Test
+    void raiseBeforeBet_RaisesException() {
+        final RoundInContext first = round
+                .with(firstPlayer);
+
+        assertThatThrownBy(() -> first.raiseTo(1337))
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "Cannot RAISE",
+                        "no BET to CALL/RAISE/FOLD on"
+                );
+    }
+
+    @Test
+    void checkAfterBet_RaisesException() {
+        final RoundInContext second = round
+                .with(firstPlayer).bet(42)
+                .with(secondPlayer);
+
+        assertThatThrownBy(second::check)
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "Cannot CHECK",
+                        "need to CALL/RAISE/FOLD to",
+                        firstPlayer.toString()
+                );
+    }
+
+    @Test
+    void betAfterBet_RaisesException() {
+        final RoundInContext second = round
+                .with(firstPlayer).bet(42)
+                .with(secondPlayer);
+
+        assertThatThrownBy(() -> second.bet(82))
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "Cannot BET",
+                        "need to CALL/RAISE/FOLD to",
+                        firstPlayer.toString()
+                );
+    }
+
+    @Test
+    void startingWithSecondInsteadOfFirstPlayer_RaisesException() {
+        final RoundInContext second = round
+                .with(secondPlayer);
+
+        assertThatThrownBy(() -> second.bet(1337))
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "wrong player: " + secondPlayer,
+                        "next player is: " + firstPlayer
+                );
+    }
+
+    @Test
+    void incorrectlySkippingSecondPlayer_RaisesException() {
+        final RoundInContext third = round
+                .with(firstPlayer).check()
+                .with(thirdPlayer);
+
+        assertThatThrownBy(third::check)
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "wrong player: " + thirdPlayer,
+                        "next player is: " + secondPlayer
+                );
+    }
+}
