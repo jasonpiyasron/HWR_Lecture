@@ -15,7 +15,7 @@ public class Card {
         return color;
     }
 
-    public Symbol number() {
+    public Symbol symbol() {
         return number;
     }
 

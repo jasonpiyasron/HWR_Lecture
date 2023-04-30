@@ -24,7 +24,7 @@ class EasierCardImportsForTestsTest {
     void string7H_IsSevenOfHearts() {
         final String sevenOfHeartsString = "7H";
         final Card card = converter.from(sevenOfHeartsString);
-        assertThat(card.number()).isEqualTo(Symbol.SEVEN);
+        assertThat(card.symbol()).isEqualTo(Symbol.SEVEN);
         assertThat(card.color()).isEqualTo(Color.HEARTS);
     }
 
@@ -33,7 +33,7 @@ class EasierCardImportsForTestsTest {
     void stringAS_IsSevenOfHearts() {
         final String aceOfSpadesString = "AS";
         final Card card = converter.from(aceOfSpadesString);
-        assertThat(card.number()).isEqualTo(Symbol.ACE);
+        assertThat(card.symbol()).isEqualTo(Symbol.ACE);
         assertThat(card.color()).isEqualTo(Color.SPADES);
     }
 
@@ -42,7 +42,7 @@ class EasierCardImportsForTestsTest {
     void string8C_IsEightOfClubs() {
         final String aceOfSpadesString = "8C";
         final Card card = converter.from(aceOfSpadesString);
-        assertThat(card.number()).isEqualTo(Symbol.EIGHT);
+        assertThat(card.symbol()).isEqualTo(Symbol.EIGHT);
         assertThat(card.color()).isEqualTo(Color.CLUBS);
     }
 
@@ -51,7 +51,7 @@ class EasierCardImportsForTestsTest {
     void stringJD_IsJackOfDiamonds() {
         final String aceOfSpadesString = "JD";
         final Card card = converter.from(aceOfSpadesString);
-        assertThat(card.number()).isEqualTo(Symbol.JACK);
+        assertThat(card.symbol()).isEqualTo(Symbol.JACK);
         assertThat(card.color()).isEqualTo(Color.DIAMONDS);
     }
 }

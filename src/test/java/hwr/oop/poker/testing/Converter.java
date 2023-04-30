@@ -8,6 +8,14 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class Converter {
+    public static Converter create() {
+        return new Converter();
+    }
+
+    private Converter() {
+        // nothing to do
+    }
+
     public Card from(String singleCardString) {
         assertValidLength(singleCardString);
         final String symbolString = singleCardString.substring(0, 1);
@@ -18,11 +26,7 @@ public class Converter {
         );
     }
 
-    private Converter() {
-        // nothing to do
-    }
-
-    private static Symbol parseSymbol(String symbolString) {
+    private Symbol parseSymbol(String symbolString) {
         final Optional<Symbol> element = Arrays.stream(Symbol.values())
                 .filter(s -> s.stringRepresentation().equals(symbolString))
                 .findFirst();
@@ -35,7 +39,7 @@ public class Converter {
 
     }
 
-    private static Color parseColor(String colorString) {
+    private Color parseColor(String colorString) {
         final Optional<Color> element = Arrays.stream(Color.values())
                 .filter(s -> s.stringRepresentation().equals(colorString))
                 .findFirst();
@@ -47,13 +51,9 @@ public class Converter {
         }
     }
 
-    private static void assertValidLength(String singleCardString) {
+    private void assertValidLength(String singleCardString) {
         if (singleCardString.length() > 2) {
             throw new IllegalArgumentException("Can not create card from string, expected: [23456789TJQKA][HDSC], actual: " + singleCardString);
         }
-    }
-
-    public static Converter create() {
-        return new Converter();
     }
 }
