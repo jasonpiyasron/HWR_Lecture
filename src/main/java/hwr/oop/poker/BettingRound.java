@@ -1,6 +1,7 @@
 package hwr.oop.poker;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -148,6 +149,16 @@ public class BettingRound {
         return plays.stream()
                 .filter(Play::isFold)
                 .anyMatch(play -> play.playedBy(candidate));
+    }
+
+    public Collection<Player> remainingPlayers() {
+        return players.stream()
+                .filter(this::hasPlayerNotFolded)
+                .collect(Collectors.toList());
+    }
+
+    private boolean hasPlayerNotFolded(Player player) {
+        return plays.stream().noneMatch(play -> play.playedBy(player) && play.isFold());
     }
 
     public static class InvalidPlayOnStateException extends RuntimeException {

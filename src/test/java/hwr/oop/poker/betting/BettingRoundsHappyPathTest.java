@@ -7,16 +7,18 @@ import hwr.oop.poker.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BettingRoundsHappyPathTest {
 
     private Player firstPlayer;
     private Player secondPlayer;
     private Player thirdPlayer;
+    private List<Player> allPlayers;
     private BettingRound round;
 
     @BeforeEach
@@ -24,12 +26,18 @@ class BettingRoundsHappyPathTest {
         firstPlayer = new Player("1");
         secondPlayer = new Player("2");
         thirdPlayer = new Player("3");
-        List<Player> players = List.of(
+        allPlayers = List.of(
                 firstPlayer,
                 secondPlayer,
                 thirdPlayer
         );
-        round = new BettingRound(players);
+        round = new BettingRound(allPlayers);
+    }
+
+    @Test
+    void newBettingRound_AllPlayersPlaying() {
+        final Collection<Player> remainingPlayers = round.remainingPlayers();
+        assertThat(remainingPlayers).containsExactlyInAnyOrderElementsOf(allPlayers);
     }
 
     @Test
@@ -89,6 +97,15 @@ class BettingRoundsHappyPathTest {
     }
 
     @Test
+    void firstPlayerBets10Chips_RemainingPlayers_AllStillPresent() {
+        final BettingRound updatedBettingRound =
+                round.with(firstPlayer).bet(10);
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers).containsExactlyInAnyOrderElementsOf(allPlayers);
+    }
+
+    @Test
     void secondPlayerCallsFirstPlayersBet_RoundIsNotFinished_ActionIsOnThirdPlayer() {
         final BettingRound updatedBettingRound = round
                 .with(firstPlayer).bet(10)
@@ -126,6 +143,16 @@ class BettingRoundsHappyPathTest {
 
         final ChipValue potSize = updatedBettingRound.pot();
         assertThat(potSize).isEqualTo(ChipValue.of(20));
+    }
+
+    @Test
+    void secondPlayerCallsFirstPlayersBet_AllPlayersStillPlaying() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).bet(10)
+                .with(secondPlayer).call();
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers).containsExactlyInAnyOrderElementsOf(allPlayers);
     }
 
     @Test
@@ -172,6 +199,17 @@ class BettingRoundsHappyPathTest {
     }
 
     @Test
+    void thirdAndSecondPlayerCalled_AllPlayersStillPlaying() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).bet(10)
+                .with(secondPlayer).call()
+                .with(thirdPlayer).call();
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers).containsExactlyInAnyOrderElementsOf(allPlayers);
+    }
+
+    @Test
     void betFoldRaise50Call_PotSizeOf100Chips() {
         final BettingRound updatedBettingRound = round
                 .with(firstPlayer).bet(10)
@@ -181,6 +219,20 @@ class BettingRoundsHappyPathTest {
 
         final ChipValue potSize = updatedBettingRound.pot();
         assertThat(potSize).isEqualTo(ChipValue.of(100));
+    }
+
+    @Test
+    void betFoldRaise50Call_SecondPlayerIsNotPlayingAnymore() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).bet(10)
+                .with(secondPlayer).fold()
+                .with(thirdPlayer).raiseTo(50)
+                .with(firstPlayer).call();
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers)
+                .doesNotContain(secondPlayer)
+                .containsExactlyInAnyOrder(firstPlayer, thirdPlayer);
     }
 
     @Test
@@ -261,6 +313,17 @@ class BettingRoundsHappyPathTest {
     }
 
     @Test
+    void allThreePlayersCheck_AllPlayersStillPlaying() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).check()
+                .with(secondPlayer).check()
+                .with(thirdPlayer).check();
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers).containsExactlyInAnyOrderElementsOf(allPlayers);
+    }
+
+    @Test
     void checkFoldFold_LastPlayIsCheckWithZeroChips() {
         final BettingRound updatedBettingRound = round
                 .with(firstPlayer).check()
@@ -301,6 +364,33 @@ class BettingRoundsHappyPathTest {
 
         final ChipValue potSize = updatedBettingRound.pot();
         assertThat(potSize).isEqualTo(ChipValue.zero());
+    }
+
+    @Test
+    void checkFoldFold_OnlyFirstPlayerStillPlaying() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).check()
+                .with(secondPlayer).fold()
+                .with(thirdPlayer).fold();
+
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers)
+                .doesNotContain(secondPlayer, thirdPlayer)
+                .containsExactlyInAnyOrder(firstPlayer);
+    }
+
+    @Test
+    void betFoldRaise3Bet_SecondPlayerFoldedAndIsThusSkipped() {
+        final BettingRound updatedBettingRound = round
+                .with(firstPlayer).bet(10)
+                .with(secondPlayer).fold()
+                .with(thirdPlayer).raiseTo(50)
+                .with(firstPlayer).raiseTo(120);
+
+        final Optional<Player> optional = updatedBettingRound.turn();
+        assertThat(optional).isPresent();
+        final Player player = optional.get();
+        assertThat(player).isEqualTo(thirdPlayer);
     }
 
     @Test
@@ -353,16 +443,17 @@ class BettingRoundsHappyPathTest {
     }
 
     @Test
-    void betFoldRaise3Bet_SecondPlayerFoldedAndIsThusSkipped() {
+    void betFoldRaise3BetCall_SecondPlayerIsNotPlayingAnymore() {
         final BettingRound updatedBettingRound = round
                 .with(firstPlayer).bet(10)
                 .with(secondPlayer).fold()
                 .with(thirdPlayer).raiseTo(50)
-                .with(firstPlayer).raiseTo(120);
+                .with(firstPlayer).raiseTo(120)
+                .with(thirdPlayer).call();
 
-        final Optional<Player> optional = updatedBettingRound.turn();
-        assertThat(optional).isPresent();
-        final Player player = optional.get();
-        assertThat(player).isEqualTo(thirdPlayer);
+        final Collection<Player> remainingPlayers = updatedBettingRound.remainingPlayers();
+        assertThat(remainingPlayers)
+                .containsExactlyInAnyOrder(firstPlayer, thirdPlayer)
+                .doesNotContain(secondPlayer);
     }
 }
