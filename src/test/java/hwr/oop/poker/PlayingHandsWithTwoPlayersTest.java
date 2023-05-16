@@ -192,9 +192,17 @@ class PlayingHandsWithTwoPlayersTest {
         }
 
         @Test
-        @Disabled("Pre Flop finished: Three more betting rounds, not yet implemented")
         void preFlopFinished_ThreeMoreBettingRound() {
-            Assertions.fail("Not yet implemented");
+            // given
+            final BettingRound preFlop = hand.preFlop();
+            final BettingRound preFlopPlayed = preFlop
+                    .with(firstPlayer).check()
+                    .with(secondPlayer).check();
+            // when
+            final Hand updatedHand = hand.accept(preFlopPlayed);
+            // then
+            boolean isPreFlopPlayed = updatedHand.preFlopPlayed();
+            assertThat(isPreFlopPlayed).isTrue();
         }
 
         @Test
