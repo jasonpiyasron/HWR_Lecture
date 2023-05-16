@@ -112,4 +112,20 @@ class WrongPlaysOnBettingRoundsTest {
                         "next player is: " + secondPlayer
                 );
     }
+
+    @Test
+    void raisingToLessThanTheDoubleOfTheBet_RaisesException() {
+        final RoundInContext third = round
+                .with(firstPlayer).bet(42)
+                .with(secondPlayer);
+
+        assertThatThrownBy(() -> third.raiseTo(60))
+                .isInstanceOf(BettingRound.InvalidPlayOnStateException.class)
+                .hasMessageContainingAll(
+                        "Cannot RAISE",
+                        "BET is 42",
+                        "expected RAISE to 82 or higher",
+                        "got 60"
+                );
+    }
 }

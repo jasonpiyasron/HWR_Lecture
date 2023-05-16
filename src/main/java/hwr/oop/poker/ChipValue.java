@@ -11,6 +11,10 @@ public interface ChipValue extends Comparable<ChipValue> {
         return ChipValue.of(0);
     }
 
+    static ChipValue minRaise(ChipValue bet) {
+        return ChipValue.of(bet.value() * 2);
+    }
+
     long value();
 
     default ChipValue minus(ChipValue other) {
@@ -24,6 +28,10 @@ public interface ChipValue extends Comparable<ChipValue> {
     @Override
     default int compareTo(ChipValue o) {
         return Long.compare(value(), o.value());
+    }
+
+    default boolean isLessThan(ChipValue minRaise) {
+        return compareTo(minRaise) < 0;
     }
 
     class SimpleChipValue implements ChipValue {

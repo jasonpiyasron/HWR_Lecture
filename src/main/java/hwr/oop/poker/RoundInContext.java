@@ -63,6 +63,13 @@ public class RoundInContext {
             throw new BettingRound.InvalidPlayOnStateException("Cannot RAISE, no BET to CALL/RAISE/FOLD on");
         } else {
             final ChipValue target = ChipValue.of(value);
+            final ChipValue previousBet = lastIncreasingPlay.get().totalChipValue();
+            final ChipValue minRaise = ChipValue.minRaise(previousBet);
+            if (target.isLessThan(minRaise)) {
+                throw new BettingRound.InvalidPlayOnStateException("Cannot RAISE, BET is 42," +
+                        " expected RAISE to 82 or higher," +
+                        " got 60");
+            }
             final Play play = playUsedToGetTo(target);
             return bettingRound.apply(play);
         }
