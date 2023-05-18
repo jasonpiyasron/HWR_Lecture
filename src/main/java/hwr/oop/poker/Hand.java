@@ -15,10 +15,12 @@ public class Hand {
     private final List<Player> players;
     private final BlindConfiguration blindConfiguration;
     private final Map<Player, List<Card>> holeCards;
-    private final BettingRound preFlop;
-    private final BettingRound flop;
-    private final BettingRound turn;
-    private final BettingRound river;
+    private final BettingRound preFlopBettingRound;
+    private final BettingRound flopBettingRound;
+    private final BettingRound turnBettingRound;
+    private final BettingRound riverBettingRound;
+
+    private final CommunityCards communityCards;
 
     public static Builder newBuilder() {
         return new Builder();
@@ -30,28 +32,44 @@ public class Hand {
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = new HashMap<>();
         dealHoleCards();
-        this.preFlop = null;
-        this.flop = null;
-        this.turn = null;
-        this.river = null;
+        this.preFlopBettingRound = null;
+        this.flopBettingRound = null;
+        this.turnBettingRound = null;
+        this.riverBettingRound = null;
+        this.communityCards = CommunityCards.empty();
     }
 
     private Hand(Deck deck,
                  List<Player> players,
                  SmallBlind smallBlind,
                  Map<Player, List<Card>> holeCards,
-                 BettingRound preFlop,
-                 BettingRound flop,
-                 BettingRound turn,
-                 BettingRound river) {
+                 BettingRound preFlopBettingRound,
+                 BettingRound flopBettingRound,
+                 BettingRound turnBettingRound,
+                 BettingRound riverBettingRound,
+                 CommunityCards communityCards) {
         this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = holeCards;
-        this.preFlop = preFlop;
-        this.flop = flop;
-        this.turn = turn;
-        this.river = river;
+        this.preFlopBettingRound = preFlopBettingRound;
+        this.flopBettingRound = flopBettingRound;
+        this.turnBettingRound = turnBettingRound;
+        this.riverBettingRound = riverBettingRound;
+        if (roundPlayed(preFlopBettingRound)) {
+            deck.draw();  // burn card
+            if (roundPlayed(flopBettingRound)) {
+                this.communityCards = CommunityCards
+                        .flop(communityCards.flop().orElseThrow())
+                        .turn(deck.draw()).noRiver();
+            } else {
+                this.communityCards = CommunityCards.flop(
+                        deck.draw(), deck.draw(), deck.draw()
+                ).noTurnNoRiver();
+            }
+        } else {
+            this.communityCards = communityCards;
+        }
     }
 
     private void dealHoleCards() {
@@ -93,29 +111,37 @@ public class Hand {
     }
 
     public Optional<Flop> flop() {
-        return Optional.empty();
+        return communityCards.flop();
     }
 
     public Optional<Turn> turn() {
-        return Optional.empty();
+        return communityCards.turn();
     }
 
     public Optional<River> river() {
-        return Optional.empty();
+        return communityCards.river();
     }
 
     public CommunityCards communityCards() {
-        return new CommunityCards();
+        return communityCards;
     }
 
     public BettingRound preFlop() {
         return new BettingRound(players);
     }
 
-    public Hand accept(BettingRound preFlopPlayed) {
-        return copy()
-                .preFlop(preFlopPlayed)
-                .build();
+    public Hand accept(BettingRound bettingRoundPlayed) {
+        final Builder copy = copy();
+        if (preFlopRoundPlayed()) {
+            if (flopRoundPlayed()) {
+                copy.turnRound(bettingRoundPlayed);
+            } else {
+                copy.flopRound(bettingRoundPlayed);
+            }
+        } else {
+            copy.preFlopRound(bettingRoundPlayed);
+        }
+        return copy.build();
     }
 
     private Builder copy() {
@@ -124,14 +150,31 @@ public class Hand {
                 .players(players)
                 .smallBlind(blindConfiguration.smallBlind())
                 .holeCards(holeCards)
-                .preFlop(preFlop)
-                .flop(flop)
-                .turn(turn)
-                .river(river);
+                .preFlopRound(preFlopBettingRound)
+                .flopRound(flopBettingRound)
+                .turnRound(turnBettingRound)
+                .river(riverBettingRound)
+                .communityCards(communityCards);
     }
 
-    public boolean preFlopPlayed() {
-        return preFlop != null && preFlop.isFinished();
+    public boolean preFlopRoundPlayed() {
+        return roundPlayed(preFlopBettingRound);
+    }
+
+    public boolean flopRoundPlayed() {
+        return roundPlayed(flopBettingRound);
+    }
+
+    public boolean turnRoundPlayed() {
+        return roundPlayed(turnBettingRound);
+    }
+
+    public boolean riverRoundPlayed() {
+        return roundPlayed(riverBettingRound);
+    }
+
+    private boolean roundPlayed(BettingRound bettingRound) {
+        return bettingRound != null && bettingRound.isFinished();
     }
 
     static class Builder {
@@ -139,63 +182,74 @@ public class Hand {
         private List<Player> players;
         private SmallBlind smallBlind;
         private Map<Player, List<Card>> holeCards;
-        private BettingRound preFlop;
-        private BettingRound flop;
-        private BettingRound turn;
-        private BettingRound river;
-
-        Hand build() {
-            final boolean hasIncompleteInfo = Stream.of(holeCards, preFlop).anyMatch(Objects::isNull);
-            if (hasIncompleteInfo) {
-                return new Hand(deck, players, smallBlind);
-            } else {
-                return new Hand(deck, players, smallBlind, holeCards, preFlop, flop, turn, river);
-            }
-        }
-
-        Builder deck(Deck deck) {
-            this.deck = deck;
-            return this;
-        }
-
-        Builder players(List<Player> players) {
-            this.players = players;
-            return this;
-        }
-
-        Builder smallBlind(SmallBlind smallBlind) {
-            this.smallBlind = smallBlind;
-            return this;
-        }
-
-        Builder holeCards(Map<Player, List<Card>> holeCards) {
-            this.holeCards = holeCards;
-            return this;
-        }
+        private BettingRound preFlopRound;
+        private BettingRound flopRound;
+        private BettingRound turnRound;
+        private BettingRound riverRound;
+        private CommunityCards communityCards;
 
         private Builder() {
             this.deck = null;
             this.players = null;
             this.smallBlind = null;
+            this.holeCards = null;
+            this.preFlopRound = null;
+            this.turnRound = null;
+            this.riverRound = null;
+            this.communityCards = null;
         }
 
-        public Builder preFlop(BettingRound preFlop) {
-            this.preFlop = preFlop;
+        Hand build() {
+            final boolean hasIncompleteInfo = Stream.of(holeCards, preFlopRound, communityCards).anyMatch(Objects::isNull);
+            if (hasIncompleteInfo) {
+                return new Hand(deck, players, smallBlind);
+            } else {
+                return new Hand(deck, players, smallBlind, holeCards, preFlopRound, flopRound, turnRound, riverRound, communityCards);
+            }
+        }
+
+        public Builder deck(Deck deck) {
+            this.deck = deck;
             return this;
         }
 
-        public Builder flop(BettingRound flop) {
-            this.flop = flop;
+        public Builder players(List<Player> players) {
+            this.players = players;
             return this;
         }
 
-        public Builder turn(BettingRound turn) {
-            this.turn = turn;
+        public Builder smallBlind(SmallBlind smallBlind) {
+            this.smallBlind = smallBlind;
             return this;
         }
 
-        public Builder river(BettingRound river) {
-            this.river = river;
+        public Builder holeCards(Map<Player, List<Card>> holeCards) {
+            this.holeCards = holeCards;
+            return this;
+        }
+
+        public Builder preFlopRound(BettingRound preFlopRound) {
+            this.preFlopRound = preFlopRound;
+            return this;
+        }
+
+        public Builder flopRound(BettingRound flopRound) {
+            this.flopRound = flopRound;
+            return this;
+        }
+
+        public Builder turnRound(BettingRound turnRound) {
+            this.turnRound = turnRound;
+            return this;
+        }
+
+        public Builder river(BettingRound riverRound) {
+            this.riverRound = riverRound;
+            return this;
+        }
+
+        public Builder communityCards(CommunityCards communityCards) {
+            this.communityCards = communityCards;
             return this;
         }
     }
