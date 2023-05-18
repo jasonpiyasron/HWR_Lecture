@@ -46,7 +46,7 @@ class DeckTest {
     void emptyDeck_PeekOnTopCard_ThrowsException() {
         final Deck deck = new RandomDeck();
         deck.drawAllCards();
-        assertThrows(Deck.DrawFromEmptyDeckException.class, deck::topCard);
+        assertThrows(Deck.DrawFromEmptyDeckException.class, deck::top);
     }
 
     @Test
@@ -54,7 +54,7 @@ class DeckTest {
     void emptyDeck_RemoveFirstCard_ThrowsException() {
         final Deck deck = new RandomDeck();
         deck.drawAllCards();
-        assertThrows(Deck.DrawFromEmptyDeckException.class, deck::popFirstCard);
+        assertThrows(Deck.DrawFromEmptyDeckException.class, deck::burn);
     }
 
     @Nested
@@ -107,7 +107,7 @@ class DeckTest {
                     new Card(Color.HEARTS, Symbol.SEVEN)
             );
             deck.drawAllCards();
-            assertThrows(Deck.DrawFromEmptyDeckException.class, deck::topCard);
+            assertThrows(Deck.DrawFromEmptyDeckException.class, deck::top);
         }
 
         @Test
@@ -117,7 +117,7 @@ class DeckTest {
                     new Card(Color.HEARTS, Symbol.SEVEN)
             );
             deck.drawAllCards();
-            assertThrows(Deck.DrawFromEmptyDeckException.class, deck::popFirstCard);
+            assertThrows(Deck.DrawFromEmptyDeckException.class, deck::burn);
         }
 
     }

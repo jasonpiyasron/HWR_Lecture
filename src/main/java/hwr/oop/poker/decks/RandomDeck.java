@@ -30,17 +30,17 @@ public class RandomDeck implements Deck {
     }
 
     @Override
-    public Card topCard() {
+    public Card top() {
         if (isEmpty()) {
-            throw new DrawFromEmptyDeckException("Cannot peek at top Card if Deck #isEmpty");
+            throw new DrawFromEmptyDeckException("Cannot peek at top Card if Deck is empty");
         }
         return cards.get(0);
     }
 
     @Override
-    public void popFirstCard() {
+    public void burn() {
         if (isEmpty()) {
-            throw new DrawFromEmptyDeckException("Cannot remove top card if Deck #isEmpty");
+            throw new DrawFromEmptyDeckException("Cannot burn card if Deck is empty");
         }
         cards.remove(0);
     }

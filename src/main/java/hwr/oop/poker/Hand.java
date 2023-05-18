@@ -57,7 +57,7 @@ public class Hand {
         this.turnBettingRound = turnBettingRound;
         this.riverBettingRound = riverBettingRound;
         if (roundPlayed(preFlopBettingRound)) {
-            deck.draw();  // burn card
+            deck.burn();
             if (roundPlayed(flopBettingRound)) {
                 this.communityCards = CommunityCards
                         .flop(communityCards.flop().orElseThrow())
@@ -223,7 +223,7 @@ public class Hand {
             return this;
         }
 
-        public Builder holeCards(Map<Player, List<Card>> holeCards) {
+        private Builder holeCards(Map<Player, List<Card>> holeCards) {
             this.holeCards = holeCards;
             return this;
         }

@@ -6,16 +6,16 @@ import java.util.List;
 public interface Deck {
     boolean isEmpty();
 
-    Card topCard();
+    Card top();
 
-    void popFirstCard();
+    void burn();
 
     default Card draw() {
         if (isEmpty()) {
             throw new DrawFromEmptyDeckException("Cannot #draw if Deck #isEmpty");
         }
-        final Card card = topCard();
-        popFirstCard();
+        final Card card = top();
+        burn();
         return card;
     }
 
