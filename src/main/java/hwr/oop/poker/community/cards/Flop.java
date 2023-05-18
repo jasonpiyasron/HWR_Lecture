@@ -5,30 +5,25 @@ import hwr.oop.poker.Card;
 import java.util.Collection;
 import java.util.List;
 
-public interface Flop {
+public class Flop {
+
+    private final List<Card> cards;
 
     static Flop of(List<Card> list) {
-        return new SimpleFlop(list);
+        return new Flop(list);
     }
 
-    Collection<Card> cards();
-
-    class SimpleFlop implements Flop {
-
-        private final List<Card> cards;
-
-        private SimpleFlop(List<Card> cards) {
-            this.cards = cards;
-        }
-
-        @Override
-        public Collection<Card> cards() {
-            return List.copyOf(cards);
-        }
-
-        @Override
-        public String toString() {
-            return "Flop{" + cards + '}';
-        }
+    private Flop(List<Card> cards) {
+        this.cards = cards;
     }
+
+    public Collection<Card> cards() {
+        return List.copyOf(cards);
+    }
+
+    @Override
+    public String toString() {
+        return "Flop{" + cards + '}';
+    }
+
 }

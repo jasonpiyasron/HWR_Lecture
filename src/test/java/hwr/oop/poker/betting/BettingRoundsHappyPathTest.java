@@ -1,8 +1,6 @@
 package hwr.oop.poker.betting;
 
-import hwr.oop.poker.BettingRound;
 import hwr.oop.poker.ChipValue;
-import hwr.oop.poker.Play;
 import hwr.oop.poker.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

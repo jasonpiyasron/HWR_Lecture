@@ -1,5 +1,6 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
 import hwr.oop.poker.community.cards.CommunityCards;
@@ -63,9 +64,9 @@ public class Hand {
                         .flop(communityCards.flop().orElseThrow())
                         .turn(deck.draw()).noRiver();
             } else {
-                this.communityCards = CommunityCards.flop(
-                        deck.draw(), deck.draw(), deck.draw()
-                ).noTurnNoRiver();
+                this.communityCards = CommunityCards
+                        .flop(deck.draw(), deck.draw(), deck.draw())
+                        .noTurnNoRiver();
             }
         } else {
             this.communityCards = communityCards;

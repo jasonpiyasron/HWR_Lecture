@@ -1,4 +1,7 @@
-package hwr.oop.poker;
+package hwr.oop.poker.betting;
+
+import hwr.oop.poker.ChipValue;
+import hwr.oop.poker.Player;
 
 import java.util.ArrayList;
 import java.util.Collection;

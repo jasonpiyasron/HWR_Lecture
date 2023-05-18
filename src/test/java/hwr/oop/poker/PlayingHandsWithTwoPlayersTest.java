@@ -1,5 +1,6 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.blinds.BigBlind;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;

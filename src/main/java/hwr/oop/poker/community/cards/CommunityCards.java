@@ -9,29 +9,69 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface CommunityCards {
-    static CommunityCards empty() {
-        return new SimpleCommunityCards();
+public class CommunityCards {
+    public static CommunityCards empty() {
+        return new CommunityCards();
     }
 
-    static CommunityCardBuilder flop(Card... cards) {
-        return new CommunityCardBuilder(Flop.of(Arrays.asList(cards)));
+    public static CommunityCardBuilder flop(Card... cards) {
+        return flop(Flop.of(Arrays.asList(cards)));
     }
 
-    static CommunityCardBuilder flop(Flop flop) {
+    public static CommunityCardBuilder flop(Flop flop) {
         return new CommunityCardBuilder(flop);
     }
 
-    Collection<Card> cardsDealt();
+    private final Flop flop;
+    private final Turn turn;
+    private final River river;
 
-    Optional<Flop> flop();
+    public CommunityCards(Flop flop) {
+        this(flop, null, null);
+    }
 
-    Optional<Turn> turn();
+    public CommunityCards(Flop flop, Turn turn, River river) {
+        this.flop = flop;
+        this.turn = turn;
+        this.river = river;
+    }
 
-    Optional<River> river();
+    public CommunityCards() {
+        this(null, null, null);
+    }
+
+    public CommunityCards(Flop flop, Turn turn) {
+        this(flop, turn, null);
+    }
+
+    public Collection<Card> cardsDealt() {
+        if (flop != null) {
+            if (turn != null) {
+                return Stream.of(flop.cards(), List.of(turn.card()))
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+            } else {
+                return flop.cards();
+            }
+        } else {
+            return List.of();
+        }
+    }
+
+    public Optional<Flop> flop() {
+        return Optional.ofNullable(flop);
+    }
+
+    public Optional<Turn> turn() {
+        return Optional.ofNullable(turn);
+    }
+
+    public Optional<River> river() {
+        return Optional.ofNullable(river);
+    }
 
 
-    class CommunityCardBuilder {
+    public static class CommunityCardBuilder {
 
         private final Flop flop;
         private Turn turn;
@@ -46,66 +86,12 @@ public interface CommunityCards {
         }
 
         public CommunityCards noTurnNoRiver() {
-            return new SimpleCommunityCards(flop);
+            return new CommunityCards(flop);
         }
 
         public CommunityCards noRiver() {
-            return new SimpleCommunityCards(flop, turn);
+            return new CommunityCards(flop, turn);
         }
     }
 
-    class SimpleCommunityCards implements CommunityCards {
-
-        private final Flop flop;
-        private final Turn turn;
-        private final River river;
-
-        public SimpleCommunityCards(Flop flop) {
-            this(flop, null, null);
-        }
-
-        public SimpleCommunityCards(Flop flop, Turn turn, River river) {
-            this.flop = flop;
-            this.turn = turn;
-            this.river = river;
-        }
-
-        public SimpleCommunityCards() {
-            this(null, null, null);
-        }
-
-        public SimpleCommunityCards(Flop flop, Turn turn) {
-            this(flop, turn, null);
-        }
-
-        @Override
-        public Collection<Card> cardsDealt() {
-            if (flop != null) {
-                if (turn != null) {
-                    return Stream.of(flop.cards(), List.of(turn.card()))
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                } else {
-                    return flop.cards();
-                }
-            } else {
-                return List.of();
-            }
-        }
-
-        @Override
-        public Optional<Flop> flop() {
-            return Optional.ofNullable(flop);
-        }
-
-        @Override
-        public Optional<Turn> turn() {
-            return Optional.ofNullable(turn);
-        }
-
-        @Override
-        public Optional<River> river() {
-            return Optional.ofNullable(river);
-        }
-    }
 }
