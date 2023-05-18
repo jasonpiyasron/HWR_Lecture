@@ -3,10 +3,7 @@ package hwr.oop.poker;
 import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
-import hwr.oop.poker.community.cards.CommunityCards;
-import hwr.oop.poker.community.cards.Flop;
-import hwr.oop.poker.community.cards.River;
-import hwr.oop.poker.community.cards.Turn;
+import hwr.oop.poker.community.cards.*;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -21,7 +18,6 @@ public class Hand {
     private final BettingRound flopBettingRound;
     private final BettingRound turnBettingRound;
     private final BettingRound riverBettingRound;
-
     private final CommunityCards communityCards;
 
     public static Builder newBuilder() {
@@ -58,28 +54,9 @@ public class Hand {
         this.flopBettingRound = flopBettingRound;
         this.turnBettingRound = turnBettingRound;
         this.riverBettingRound = riverBettingRound;
-        if (roundPlayed(preFlopBettingRound)) {
-            deck.burn();
-            if (roundPlayed(flopBettingRound)) {
-                if (roundPlayed(turnBettingRound)) {
-                    this.communityCards = CommunityCards
-                            .flop(communityCards.flop().orElseThrow())
-                            .turn(communityCards.turn().orElseThrow())
-                            .river(deck.draw());
-                } else {
-                    this.communityCards = CommunityCards
-                            .flop(communityCards.flop().orElseThrow())
-                            .turn(deck.draw())
-                            .noRiver();
-                }
-            } else {
-                this.communityCards = CommunityCards
-                        .flop(deck.draw(), deck.draw(), deck.draw())
-                        .noTurnNoRiver();
-            }
-        } else {
-            this.communityCards = communityCards;
-        }
+        this.communityCards = CommunityCardFactory
+                .basedOn(communityCards, this)
+                .drawCardsFrom(deck);
     }
 
     private void dealHoleCards() {
