@@ -5,7 +5,7 @@ import hwr.oop.poker.Card;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Flop implements CommunityCardProvider {
+public class Flop implements Card.Provider {
 
     private final List<Card> cards;
 

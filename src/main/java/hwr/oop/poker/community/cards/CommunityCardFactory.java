@@ -2,6 +2,7 @@ package hwr.oop.poker.community.cards;
 
 import hwr.oop.poker.Deck;
 import hwr.oop.poker.Hand;
+import hwr.oop.poker.betting.positions.RoundPosition;
 
 public class CommunityCardFactory {
 
@@ -18,27 +19,9 @@ public class CommunityCardFactory {
     }
 
     public CommunityCards drawCardsFrom(Deck deck) {
-        if (hand.preFlopRoundPlayed()) {
-            deck.burn();
-            if (hand.flopRoundPlayed()) {
-                if (hand.turnRoundPlayed()) {
-                    return CommunityCards
-                            .flop(cards.flop().orElseThrow())
-                            .turn(cards.turn().orElseThrow())
-                            .river(deck.draw());
-                } else {
-                    return CommunityCards
-                            .flop(cards.flop().orElseThrow())
-                            .turn(deck.draw())
-                            .noRiver();
-                }
-            } else {
-                return CommunityCards
-                        .flop(deck.draw(), deck.draw(), deck.draw())
-                        .noTurnNoRiver();
-            }
-        } else {
-            return cards;
-        }
+        RoundPosition position = hand.currentPosition();
+        position.ifRequiresBurn(deck::burn);
+        return position.buildCardsFor(deck, cards);
     }
+
 }

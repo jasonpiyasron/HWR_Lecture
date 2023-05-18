@@ -47,7 +47,7 @@ public class CommunityCards {
     public Collection<Card> cardsDealt() {
         return Stream.of(flop, turn, river)
                 .filter(Objects::nonNull)
-                .flatMap(CommunityCardProvider::cards)
+                .flatMap(Card.Provider::cards)
                 .collect(Collectors.toList());
     }
 

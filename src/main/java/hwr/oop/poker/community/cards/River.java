@@ -4,7 +4,7 @@ import hwr.oop.poker.Card;
 
 import java.util.stream.Stream;
 
-public class River implements CommunityCardProvider {
+public class River implements Card.Provider {
 
     private final Card card;
 

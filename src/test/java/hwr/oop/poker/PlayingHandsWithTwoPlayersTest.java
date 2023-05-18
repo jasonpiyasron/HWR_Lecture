@@ -4,7 +4,6 @@ import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.blinds.BigBlind;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
-import hwr.oop.poker.community.cards.CommunityCardProvider;
 import hwr.oop.poker.community.cards.Flop;
 import hwr.oop.poker.community.cards.River;
 import hwr.oop.poker.community.cards.Turn;
@@ -313,7 +312,7 @@ class PlayingHandsWithTwoPlayersTest {
                     .containsAll(cardsOnRiver);
         }
 
-        private void assertContainsCards(CommunityCardProvider cardProvider, Collection<Card> expected) {
+        private void assertContainsCards(Card.Provider cardProvider, Collection<Card> expected) {
             assertThat(cardProvider.cards())
                     .isNotEmpty()
                     .allMatch(expected::contains);

@@ -1,6 +1,7 @@
 package hwr.oop.poker;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class Card {
     private final Color color;
@@ -39,5 +40,9 @@ public class Card {
     @Override
     public String toString() {
         return number.toString() + " of " + color.toString();
+    }
+
+    public interface Provider {
+        Stream<Card> cards();
     }
 }
