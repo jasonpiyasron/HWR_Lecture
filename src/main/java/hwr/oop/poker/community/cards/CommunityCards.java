@@ -47,9 +47,15 @@ public class CommunityCards {
     public Collection<Card> cardsDealt() {
         if (flop != null) {
             if (turn != null) {
-                return Stream.of(flop.cards(), List.of(turn.card()))
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
+                if (river != null) {
+                    return Stream.of(flop.cards(), List.of(turn.card(), river.card()))
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                } else {
+                    return Stream.of(flop.cards(), List.of(turn.card()))
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+                }
             } else {
                 return flop.cards();
             }
@@ -91,6 +97,16 @@ public class CommunityCards {
 
         public CommunityCards noRiver() {
             return new CommunityCards(flop, turn);
+        }
+
+        public CommunityCardBuilder turn(Turn turn) {
+            this.turn = turn;
+            return this;
+        }
+
+        public CommunityCards river(Card card) {
+            final River river = River.of(card);
+            return new CommunityCards(flop, turn, river);
         }
     }
 

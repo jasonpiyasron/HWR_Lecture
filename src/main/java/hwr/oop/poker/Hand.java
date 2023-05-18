@@ -60,9 +60,18 @@ public class Hand {
         if (roundPlayed(preFlopBettingRound)) {
             deck.burn();
             if (roundPlayed(flopBettingRound)) {
-                this.communityCards = CommunityCards
-                        .flop(communityCards.flop().orElseThrow())
-                        .turn(deck.draw()).noRiver();
+                if (roundPlayed(turnBettingRound)) {
+                    this.communityCards = CommunityCards
+                            .flop(communityCards.flop().orElseThrow())
+                            .turn(communityCards.turn().orElseThrow())
+                            .river(deck.draw());
+                } else {
+                    this.communityCards = CommunityCards
+                            .flop(communityCards.flop().orElseThrow())
+                            .turn(deck.draw())
+                            .noRiver();
+                }
+
             } else {
                 this.communityCards = CommunityCards
                         .flop(deck.draw(), deck.draw(), deck.draw())
@@ -127,20 +136,20 @@ public class Hand {
         return communityCards;
     }
 
-    public BettingRound preFlop() {
-        return new BettingRound(players);
-    }
-
-    public Hand accept(BettingRound bettingRoundPlayed) {
+    public Hand accept(BettingRound round) {
         final Builder copy = copy();
         if (preFlopRoundPlayed()) {
             if (flopRoundPlayed()) {
-                copy.turnRound(bettingRoundPlayed);
+                if (turnRoundPlayed()) {
+                    copy.riverRound(round);
+                } else {
+                    copy.turnRound(round);
+                }
             } else {
-                copy.flopRound(bettingRoundPlayed);
+                copy.flopRound(round);
             }
         } else {
-            copy.preFlopRound(bettingRoundPlayed);
+            copy.preFlopRound(round);
         }
         return copy.build();
     }
@@ -154,7 +163,7 @@ public class Hand {
                 .preFlopRound(preFlopBettingRound)
                 .flopRound(flopBettingRound)
                 .turnRound(turnBettingRound)
-                .river(riverBettingRound)
+                .riverRound(riverBettingRound)
                 .communityCards(communityCards);
     }
 
@@ -176,6 +185,10 @@ public class Hand {
 
     private boolean roundPlayed(BettingRound bettingRound) {
         return bettingRound != null && bettingRound.isFinished();
+    }
+
+    public BettingRound currentRound() {
+        return new BettingRound(players);
     }
 
     static class Builder {
@@ -244,7 +257,7 @@ public class Hand {
             return this;
         }
 
-        public Builder river(BettingRound riverRound) {
+        public Builder riverRound(BettingRound riverRound) {
             this.riverRound = riverRound;
             return this;
         }
