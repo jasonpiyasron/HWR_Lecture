@@ -2,23 +2,31 @@ package hwr.oop.poker.community.cards;
 
 import hwr.oop.poker.Card;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
-public class Flop {
+public class Flop implements CommunityCardProvider {
 
     private final List<Card> cards;
 
-    static Flop of(List<Card> list) {
+    public static Flop of(List<Card> list) {
         return new Flop(list);
     }
 
     private Flop(List<Card> cards) {
+        assertValidFlop(cards);
         this.cards = cards;
     }
 
-    public Collection<Card> cards() {
-        return List.copyOf(cards);
+    private void assertValidFlop(List<Card> cards) {
+        if (cards == null || cards.size() != 3) {
+            throw new InvalidFlopException(cards);
+        }
+    }
+
+    @Override
+    public Stream<Card> cards() {
+        return cards.stream();
     }
 
     @Override
@@ -26,4 +34,9 @@ public class Flop {
         return "Flop{" + cards + '}';
     }
 
+    private static class InvalidFlopException extends RuntimeException {
+        public InvalidFlopException(List<Card> cards) {
+            super("Cannot create flop, requires 3 cards, got: " + cards);
+        }
+    }
 }

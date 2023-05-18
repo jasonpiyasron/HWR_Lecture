@@ -4,12 +4,16 @@ import hwr.oop.poker.Card;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CommunityCards {
+    private final Flop flop;
+    private final Turn turn;
+    private final River river;
+
     public static CommunityCards empty() {
         return new CommunityCards();
     }
@@ -22,46 +26,29 @@ public class CommunityCards {
         return new CommunityCardBuilder(flop);
     }
 
-    private final Flop flop;
-    private final Turn turn;
-    private final River river;
+    private CommunityCards() {
+        this(null, null, null);
+    }
 
-    public CommunityCards(Flop flop) {
+    private CommunityCards(Flop flop) {
         this(flop, null, null);
     }
 
-    public CommunityCards(Flop flop, Turn turn, River river) {
+    private CommunityCards(Flop flop, Turn turn) {
+        this(flop, turn, null);
+    }
+
+    private CommunityCards(Flop flop, Turn turn, River river) {
         this.flop = flop;
         this.turn = turn;
         this.river = river;
     }
 
-    public CommunityCards() {
-        this(null, null, null);
-    }
-
-    public CommunityCards(Flop flop, Turn turn) {
-        this(flop, turn, null);
-    }
-
     public Collection<Card> cardsDealt() {
-        if (flop != null) {
-            if (turn != null) {
-                if (river != null) {
-                    return Stream.of(flop.cards(), List.of(turn.card(), river.card()))
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                } else {
-                    return Stream.of(flop.cards(), List.of(turn.card()))
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                }
-            } else {
-                return flop.cards();
-            }
-        } else {
-            return List.of();
-        }
+        return Stream.of(flop, turn, river)
+                .filter(Objects::nonNull)
+                .flatMap(CommunityCardProvider::cards)
+                .collect(Collectors.toList());
     }
 
     public Optional<Flop> flop() {
@@ -82,12 +69,27 @@ public class CommunityCards {
         private final Flop flop;
         private Turn turn;
 
-        public CommunityCardBuilder(Flop flop) {
+        private CommunityCardBuilder(Flop flop) {
+            assertFlopIsValid(flop);
             this.flop = flop;
+        }
+
+        private static void assertFlopIsValid(Flop flop) {
+            if (flop == null) {
+                throw new CannotCreateCommunityCardsException(
+                        "Cannot build community cards with the flop being null." +
+                                " If you want to create an empty Board of community cards, use CommunityCards.empty()"
+                );
+            }
         }
 
         public CommunityCardBuilder turn(Card card) {
             this.turn = Turn.of(card);
+            return this;
+        }
+
+        public CommunityCardBuilder turn(Turn turn) {
+            this.turn = turn;
             return this;
         }
 
@@ -99,14 +101,15 @@ public class CommunityCards {
             return new CommunityCards(flop, turn);
         }
 
-        public CommunityCardBuilder turn(Turn turn) {
-            this.turn = turn;
-            return this;
-        }
-
         public CommunityCards river(Card card) {
             final River river = River.of(card);
             return new CommunityCards(flop, turn, river);
+        }
+    }
+
+    private static class CannotCreateCommunityCardsException extends RuntimeException {
+        public CannotCreateCommunityCardsException(String message) {
+            super(message);
         }
     }
 

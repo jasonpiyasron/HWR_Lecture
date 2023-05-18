@@ -9,6 +9,7 @@ import hwr.oop.poker.community.cards.River;
 import hwr.oop.poker.community.cards.Turn;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class Hand {
@@ -71,7 +72,6 @@ public class Hand {
                             .turn(deck.draw())
                             .noRiver();
                 }
-
             } else {
                 this.communityCards = CommunityCards
                         .flop(deck.draw(), deck.draw(), deck.draw())
@@ -112,11 +112,11 @@ public class Hand {
         return players.get(0);
     }
 
-    public BlindConfiguration blinds() {
+    public BlindConfiguration blindConfiguration() {
         return blindConfiguration;
     }
 
-    public ChipValue podSize() {
+    public ChipValue potSize() {
         return () -> blindConfiguration.bigBlind().value() + blindConfiguration.smallBlind().value();
     }
 
@@ -136,7 +136,44 @@ public class Hand {
         return communityCards;
     }
 
-    public Hand accept(BettingRound round) {
+    public boolean preFlopRoundPlayed() {
+        return roundPlayed(preFlopBettingRound);
+    }
+
+    public boolean flopRoundPlayed() {
+        return roundPlayed(flopBettingRound);
+    }
+
+    public boolean turnRoundPlayed() {
+        return roundPlayed(turnBettingRound);
+    }
+
+    public boolean riverRoundPlayed() {
+        return roundPlayed(riverBettingRound);
+    }
+
+    public BettingRound currentRound() {
+        return new BettingRound(players);
+    }
+
+    public Hand onCurrentRound(UnaryOperator<BettingRound> function) {
+        return accept(function.apply(currentRound()));
+    }
+
+    private Builder copy() {
+        return newBuilder()
+                .deck(deck)
+                .players(players)
+                .smallBlind(blindConfiguration.smallBlind())
+                .holeCards(holeCards)
+                .preFlopRound(preFlopBettingRound)
+                .flopRound(flopBettingRound)
+                .turnRound(turnBettingRound)
+                .riverRound(riverBettingRound)
+                .communityCards(communityCards);
+    }
+
+    private Hand accept(BettingRound round) {
         final Builder copy = copy();
         if (preFlopRoundPlayed()) {
             if (flopRoundPlayed()) {
@@ -154,41 +191,8 @@ public class Hand {
         return copy.build();
     }
 
-    private Builder copy() {
-        return newBuilder()
-                .deck(deck)
-                .players(players)
-                .smallBlind(blindConfiguration.smallBlind())
-                .holeCards(holeCards)
-                .preFlopRound(preFlopBettingRound)
-                .flopRound(flopBettingRound)
-                .turnRound(turnBettingRound)
-                .riverRound(riverBettingRound)
-                .communityCards(communityCards);
-    }
-
-    public boolean preFlopRoundPlayed() {
-        return roundPlayed(preFlopBettingRound);
-    }
-
-    public boolean flopRoundPlayed() {
-        return roundPlayed(flopBettingRound);
-    }
-
-    public boolean turnRoundPlayed() {
-        return roundPlayed(turnBettingRound);
-    }
-
-    public boolean riverRoundPlayed() {
-        return roundPlayed(riverBettingRound);
-    }
-
     private boolean roundPlayed(BettingRound bettingRound) {
         return bettingRound != null && bettingRound.isFinished();
-    }
-
-    public BettingRound currentRound() {
-        return new BettingRound(players);
     }
 
     static class Builder {
@@ -242,27 +246,27 @@ public class Hand {
             return this;
         }
 
-        public Builder preFlopRound(BettingRound preFlopRound) {
+        private Builder preFlopRound(BettingRound preFlopRound) {
             this.preFlopRound = preFlopRound;
             return this;
         }
 
-        public Builder flopRound(BettingRound flopRound) {
+        private Builder flopRound(BettingRound flopRound) {
             this.flopRound = flopRound;
             return this;
         }
 
-        public Builder turnRound(BettingRound turnRound) {
+        private Builder turnRound(BettingRound turnRound) {
             this.turnRound = turnRound;
             return this;
         }
 
-        public Builder riverRound(BettingRound riverRound) {
+        private Builder riverRound(BettingRound riverRound) {
             this.riverRound = riverRound;
             return this;
         }
 
-        public Builder communityCards(CommunityCards communityCards) {
+        private Builder communityCards(CommunityCards communityCards) {
             this.communityCards = communityCards;
             return this;
         }
