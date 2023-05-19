@@ -57,7 +57,7 @@ public class Hand implements CommunityCardsProvider {
     }
 
     public List<Card> holeCards(Player player) {
-        return holeCards.get(player);
+        return holeCards.of(player);
     }
 
     public Player smallBlind() {

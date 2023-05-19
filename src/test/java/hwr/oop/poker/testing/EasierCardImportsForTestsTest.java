@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Parse cards from Strings (makes testing easier)")
@@ -53,5 +55,30 @@ class EasierCardImportsForTestsTest {
         final Card card = converter.from(aceOfSpadesString);
         assertThat(card.symbol()).isEqualTo(Symbol.JACK);
         assertThat(card.color()).isEqualTo(Color.DIAMONDS);
+    }
+
+    @Test
+    @DisplayName("JD,JS -> JACK of DIAMONDS and JACK of SPADES")
+    void twoJacksCommaSeparated_JacksOfDiamondsAndSpades() {
+        final String twoJacks = "JD,JS";
+        final List<Card> card = converter.convert(twoJacks);
+        assertThat(card).containsExactlyInAnyOrder(
+                new Card(Color.DIAMONDS, Symbol.JACK),
+                new Card(Color.SPADES, Symbol.JACK)
+        );
+    }
+
+    @Test
+    @DisplayName("TS,2S,4S,6S,8S -> TEN, TWO, FOUR, SIX, EIGHT of SPADES")
+    void fiveSpadesCommaSeparated_ConvertedToMatchingCards() {
+        final String twoJacks = "TS,2S,4S,6S,8S";
+        final List<Card> card = converter.convert(twoJacks);
+        assertThat(card).containsExactlyInAnyOrder(
+                new Card(Color.SPADES, Symbol.TWO),
+                new Card(Color.SPADES, Symbol.FOUR),
+                new Card(Color.SPADES, Symbol.SIX),
+                new Card(Color.SPADES, Symbol.EIGHT),
+                new Card(Color.SPADES, Symbol.TEN)
+        );
     }
 }

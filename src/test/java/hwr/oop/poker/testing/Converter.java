@@ -5,7 +5,9 @@ import hwr.oop.poker.Color;
 import hwr.oop.poker.Symbol;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Converter {
     public static Converter create() {
@@ -55,5 +57,11 @@ public class Converter {
         if (singleCardString.length() > 2) {
             throw new IllegalArgumentException("Can not create card from string, expected: [23456789TJQKA][HDSC], actual: " + singleCardString);
         }
+    }
+
+    public List<Card> convert(String cards) {
+        return Arrays.stream(cards.split(","))
+                .map(this::from)
+                .collect(Collectors.toList());
     }
 }

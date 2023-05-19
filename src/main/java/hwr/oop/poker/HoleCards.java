@@ -14,17 +14,17 @@ public class HoleCards {
         this.assignment = drawHoleCardsFromDeck(deck, players);
     }
 
-    public List<Card> get(Player player) {
+    public List<Card> of(Player player) {
         return assignment.get(player);
     }
 
     private Map<Player, List<Card>> drawHoleCardsFromDeck(Deck deck, List<Player> players) {
-        final var mutableMap = drawCardsForPlayers(deck, players);
-        forceCardsToBeImmutableLists(mutableMap);
+        final var mutableMap = drawCards(deck, players);
+        convertToImmutableLists(mutableMap);
         return Collections.unmodifiableMap(mutableMap);
     }
 
-    private Map<Player, List<Card>> drawCardsForPlayers(Deck deck, List<Player> players) {
+    private Map<Player, List<Card>> drawCards(Deck deck, List<Player> players) {
         final Map<Player, List<Card>> mutableMap = new HashMap<>();
         for (int i = 0; i < 2; i++) {
             for (Player player : players) {
@@ -37,7 +37,7 @@ public class HoleCards {
         return mutableMap;
     }
 
-    private void forceCardsToBeImmutableLists(Map<Player, List<Card>> mutableMap) {
+    private void convertToImmutableLists(Map<Player, List<Card>> mutableMap) {
         for (Map.Entry<Player, List<Card>> entry : mutableMap.entrySet()) {
             final var player = entry.getKey();
             final var cards = entry.getValue();
