@@ -145,7 +145,8 @@ public class Hand implements CommunityCardsProvider {
     }
 
     private Map<RoundPosition, BettingRound> createNewMapWith(BettingRound round, RoundPosition currentPosition) {
-        final Map<RoundPosition, BettingRound> mutableMap = new HashMap<>(rounds);
+        final Map<RoundPosition, BettingRound> mutableMap =
+                new HashMap<>(rounds);
         mutableMap.put(currentPosition, round);
         return Collections.unmodifiableMap(mutableMap);
     }
@@ -199,6 +200,16 @@ public class Hand implements CommunityCardsProvider {
 
     public Optional<RoundPosition> currentPosition() {
         return currentPosition(rounds);
+    }
+
+    public boolean isFinished() {
+        if (currentPosition().isEmpty()) {
+            return true;
+        } else {
+            final RoundPosition position = currentPosition().orElseThrow();
+            final BettingRound currentRound = rounds.get(position);
+            return currentRound.isFinished();
+        }
     }
 
     public static class Builder {
