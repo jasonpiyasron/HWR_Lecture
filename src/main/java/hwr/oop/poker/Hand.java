@@ -4,7 +4,10 @@ import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.betting.positions.RoundPosition;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
-import hwr.oop.poker.community.cards.*;
+import hwr.oop.poker.community.cards.CommunityCards;
+import hwr.oop.poker.community.cards.Flop;
+import hwr.oop.poker.community.cards.River;
+import hwr.oop.poker.community.cards.Turn;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -44,9 +47,13 @@ public class Hand {
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = holeCards;
         this.rounds = createMapBasedOn(rounds);
-        this.communityCards = CommunityCardFactory
-                .basedOn(communityCards, this)
-                .drawCardsFrom(deck);
+        this.communityCards = buildCommunityCards(deck, communityCards);
+    }
+
+    private CommunityCards buildCommunityCards(Deck deck, CommunityCards oldCommunityCards) {
+        RoundPosition position = currentPosition();
+        position.ifRequiresBurn(deck::burn);
+        return position.buildCardsFor(deck, oldCommunityCards);
     }
 
     public List<Card> holeCards(Player player) {
@@ -171,16 +178,14 @@ public class Hand {
     }
 
     public RoundPosition currentPosition(Map<RoundPosition, BettingRound> someRounds) {
-        if (someRounds.isEmpty()) {
-            return RoundPosition.PRE_FLOP;
+
+        final RoundPosition candidatePosition = someRounds.keySet().stream()
+                .reduce(RoundPosition::latest).orElseThrow();
+        final BettingRound candidateRound = someRounds.get(candidatePosition);
+        if (candidateRound.isFinished()) {
+            return candidatePosition.nextPosition().orElseThrow();
         } else {
-            final RoundPosition candidatePosition = someRounds.keySet().stream().reduce(RoundPosition::latest).orElseThrow();
-            final BettingRound candidateRound = someRounds.get(candidatePosition);
-            if (candidateRound.isFinished()) {
-                return candidatePosition.nextPosition().orElseThrow();
-            } else {
-                return candidatePosition;
-            }
+            return candidatePosition;
         }
     }
 
