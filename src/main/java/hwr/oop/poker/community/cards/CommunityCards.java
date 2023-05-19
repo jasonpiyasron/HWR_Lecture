@@ -9,12 +9,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CommunityCards {
+public class CommunityCards implements CommunityCardsProvider {
     private final Flop flop;
     private final Turn turn;
     private final River river;
 
-    public static CommunityCards empty() {
+    public static CommunityCardsProvider empty() {
         return new CommunityCards();
     }
 
@@ -25,6 +25,7 @@ public class CommunityCards {
     public static CommunityCardBuilder flop(Flop flop) {
         return new CommunityCardBuilder(flop);
     }
+
 
     private CommunityCards() {
         this(null, null, null);
@@ -44,6 +45,7 @@ public class CommunityCards {
         this.river = river;
     }
 
+    @Override
     public Collection<Card> cardsDealt() {
         return Stream.of(flop, turn, river)
                 .filter(Objects::nonNull)
@@ -51,14 +53,17 @@ public class CommunityCards {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Optional<Flop> flop() {
         return Optional.ofNullable(flop);
     }
 
+    @Override
     public Optional<Turn> turn() {
         return Optional.ofNullable(turn);
     }
 
+    @Override
     public Optional<River> river() {
         return Optional.ofNullable(river);
     }
@@ -69,7 +74,7 @@ public class CommunityCards {
         private final Flop flop;
         private Turn turn;
 
-        private CommunityCardBuilder(Flop flop) {
+        CommunityCardBuilder(Flop flop) {
             assertFlopIsValid(flop);
             this.flop = flop;
         }
@@ -93,15 +98,15 @@ public class CommunityCards {
             return this;
         }
 
-        public CommunityCards noTurnNoRiver() {
+        public CommunityCardsProvider noTurnNoRiver() {
             return new CommunityCards(flop);
         }
 
-        public CommunityCards noRiver() {
+        public CommunityCardsProvider noRiver() {
             return new CommunityCards(flop, turn);
         }
 
-        public CommunityCards river(Card card) {
+        public CommunityCardsProvider river(Card card) {
             final River river = River.of(card);
             return new CommunityCards(flop, turn, river);
         }

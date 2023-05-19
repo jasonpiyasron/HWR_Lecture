@@ -2,7 +2,7 @@ package hwr.oop.poker.betting.positions;
 
 
 import hwr.oop.poker.Deck;
-import hwr.oop.poker.community.cards.CommunityCards;
+import hwr.oop.poker.community.cards.CommunityCardsProvider;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ public interface RoundPosition extends Comparable<RoundPosition> {
 
     boolean shouldCauseBurn();
 
-    CommunityCards buildCardsFor(Deck deck, CommunityCards currentCards);
+    CommunityCardsProvider buildCardsFor(Deck deck, CommunityCardsProvider currentCards);
 
     Optional<RoundPosition> nextPosition();
 

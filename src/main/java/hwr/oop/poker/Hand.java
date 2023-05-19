@@ -4,22 +4,19 @@ import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.betting.positions.RoundPosition;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
-import hwr.oop.poker.community.cards.CommunityCards;
-import hwr.oop.poker.community.cards.Flop;
-import hwr.oop.poker.community.cards.River;
-import hwr.oop.poker.community.cards.Turn;
+import hwr.oop.poker.community.cards.*;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public class Hand {
+public class Hand implements CommunityCardsProvider {
     private final Deck deck;
     private final List<Player> players;
     private final BlindConfiguration blindConfiguration;
-    private final Map<Player, List<Card>> holeCards;
+    private final HoleCards holeCards;
     private final Map<RoundPosition, BettingRound> rounds;
-    private final CommunityCards communityCards;
+    private final CommunityCardsProvider communityCards;
 
     public static Builder newBuilder() {
         return new Builder();
@@ -29,30 +26,17 @@ public class Hand {
         this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
-        this.holeCards = drawHoleCardsFromDeck();
+        this.holeCards = HoleCards.create(deck, players);
         this.communityCards = CommunityCards.empty();
         this.rounds = Map.of(RoundPosition.PRE_FLOP, new BettingRound(players));
-    }
-
-    private Map<Player, List<Card>> drawHoleCardsFromDeck() {
-        final Map<Player, List<Card>> mutableMap = new HashMap<>();
-        for (int i = 0; i < 2; i++) {
-            for (Player player : this.players) {
-                final List<Card> cards = mutableMap
-                        .computeIfAbsent(player, p -> new ArrayList<>());
-                final Card drawnCard = this.deck.draw();
-                cards.add(drawnCard);
-            }
-        }
-        return Collections.unmodifiableMap(mutableMap);
     }
 
     private Hand(Deck deck,
                  List<Player> players,
                  SmallBlind smallBlind,
-                 Map<Player, List<Card>> holeCards,
+                 HoleCards holeCards,
                  Map<RoundPosition, BettingRound> rounds,
-                 CommunityCards communityCards) {
+                 CommunityCardsProvider communityCards) {
         this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
@@ -61,7 +45,7 @@ public class Hand {
         this.communityCards = buildCommunityCards(deck, communityCards);
     }
 
-    private CommunityCards buildCommunityCards(Deck deck, CommunityCards oldCommunityCards) {
+    private CommunityCardsProvider buildCommunityCards(Deck deck, CommunityCardsProvider oldCommunityCards) {
         RoundPosition position = currentPosition();
         position.ifRequiresBurn(deck::burn);
         return position.buildCardsFor(deck, oldCommunityCards);
@@ -95,20 +79,24 @@ public class Hand {
         return () -> blindConfiguration.bigBlind().value() + blindConfiguration.smallBlind().value();
     }
 
+    @Override
     public Optional<Flop> flop() {
         return communityCards.flop();
     }
 
+    @Override
     public Optional<Turn> turn() {
         return communityCards.turn();
     }
 
+    @Override
     public Optional<River> river() {
         return communityCards.river();
     }
 
-    public CommunityCards communityCards() {
-        return communityCards;
+    @Override
+    public Collection<Card> cardsDealt() {
+        return communityCards.cardsDealt();
     }
 
     public boolean preFlopRoundPlayed() {
@@ -193,13 +181,13 @@ public class Hand {
         return currentPosition(rounds);
     }
 
-    static class Builder {
+    public static class Builder {
         private Deck deck;
         private List<Player> players;
         private SmallBlind smallBlind;
-        private Map<Player, List<Card>> holeCards;
+        private HoleCards holeCards;
         private Map<RoundPosition, BettingRound> rounds;
-        private CommunityCards communityCards;
+        private CommunityCardsProvider communityCards;
 
         private Builder() {
             this.deck = null;
@@ -234,7 +222,7 @@ public class Hand {
             return this;
         }
 
-        private Builder holeCards(Map<Player, List<Card>> holeCards) {
+        private Builder holeCards(HoleCards holeCards) {
             this.holeCards = holeCards;
             return this;
         }
@@ -244,7 +232,7 @@ public class Hand {
             return this;
         }
 
-        private Builder communityCards(CommunityCards communityCards) {
+        private Builder communityCards(CommunityCardsProvider communityCards) {
             this.communityCards = communityCards;
             return this;
         }

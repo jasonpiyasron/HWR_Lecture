@@ -4,6 +4,7 @@ import hwr.oop.poker.betting.BettingRound;
 import hwr.oop.poker.blinds.BigBlind;
 import hwr.oop.poker.blinds.BlindConfiguration;
 import hwr.oop.poker.blinds.SmallBlind;
+import hwr.oop.poker.community.cards.CommunityCardsProvider;
 import hwr.oop.poker.community.cards.Flop;
 import hwr.oop.poker.community.cards.River;
 import hwr.oop.poker.community.cards.Turn;
@@ -161,7 +162,7 @@ class PlayingHandsWithTwoPlayersTest {
             final Optional<Flop> flop = hand.flop();
             final Optional<Turn> turn = hand.turn();
             final Optional<River> river = hand.river();
-            final Collection<Card> communityCards = hand.communityCards().cardsDealt();
+            final Collection<Card> communityCards = hand.cardsDealt();
             assertThat(flop).isNotPresent();
             assertThat(turn).isNotPresent();
             assertThat(river).isNotPresent();
@@ -208,12 +209,11 @@ class PlayingHandsWithTwoPlayersTest {
         @Test
         @DisplayName("pre-flop played (all check): flop is dealt")
         void preFlopFinished_FlopDealt() {
-            final Hand updatedHand = hand
+            final CommunityCardsProvider updatedHand = hand
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<Flop> flop = updatedHand.flop();
-            final Collection<Card> dealtCommunityCards =
-                    updatedHand.communityCards().cardsDealt();
+            final Collection<Card> dealtCommunityCards = updatedHand.cardsDealt();
 
             assertThat(flop)
                     .isPresent().get()
@@ -224,13 +224,12 @@ class PlayingHandsWithTwoPlayersTest {
         @Test
         @DisplayName("pre-flop played (all check): turn and river not dealt")
         void preFlopFinished_TurnAndRiverNotDealt() {
-            final Hand updatedHand = hand
+            final CommunityCardsProvider updatedHand = hand
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<Turn> turn = updatedHand.turn();
             final Optional<River> river = updatedHand.river();
-            final Collection<Card> dealtCommunityCards =
-                    updatedHand.communityCards().cardsDealt();
+            final Collection<Card> dealtCommunityCards = updatedHand.cardsDealt();
 
             assertThat(turn).isNotPresent();
             assertThat(river).isNotPresent();
@@ -269,14 +268,13 @@ class PlayingHandsWithTwoPlayersTest {
         @Test
         @DisplayName("flop played (pre-flop & flop: all checks): flop and turn dealt")
         void flopFinished_FlopAndTurnDealt() {
-            final Hand handAfterFlop = hand
+            final CommunityCardsProvider handAfterFlop = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<Flop> flop = handAfterFlop.flop();
             final Optional<Turn> turn = handAfterFlop.turn();
-            final Collection<Card> communityCards =
-                    handAfterFlop.communityCards().cardsDealt();
+            final Collection<Card> communityCards = handAfterFlop.cardsDealt();
 
             assertThat(flop)
                     .isPresent().get()
@@ -292,13 +290,12 @@ class PlayingHandsWithTwoPlayersTest {
         @Test
         @DisplayName("flop played (pre-flop & flop: all checks): river not dealt")
         void flopFinished_RiverNotDealt() {
-            final Hand handAfterFlop = hand
+            final CommunityCardsProvider handAfterFlop = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<River> river = handAfterFlop.river();
-            final Collection<Card> communityCards =
-                    handAfterFlop.communityCards().cardsDealt();
+            final Collection<Card> communityCards = handAfterFlop.cardsDealt();
 
             assertThat(river).isNotPresent();
             assertThat(communityCards)
@@ -337,7 +334,7 @@ class PlayingHandsWithTwoPlayersTest {
         @Test
         @DisplayName("turn played (pre-flop, turn & flop: all checks): flop, turn, river dealt")
         void turnFinished_PreFlopAndFlopAndTurnAndRiverDealt() {
-            final Hand handAfterTurn = hand
+            final CommunityCardsProvider handAfterTurn = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking);
@@ -345,8 +342,7 @@ class PlayingHandsWithTwoPlayersTest {
             final Optional<Flop> flop = handAfterTurn.flop();
             final Optional<Turn> turn = handAfterTurn.turn();
             final Optional<River> river = handAfterTurn.river();
-            final Collection<Card> communityCards =
-                    handAfterTurn.communityCards().cardsDealt();
+            final Collection<Card> communityCards = handAfterTurn.cardsDealt();
 
             assertThat(flop)
                     .isPresent().get()

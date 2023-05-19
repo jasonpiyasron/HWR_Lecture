@@ -2,6 +2,7 @@ package hwr.oop.poker.betting.positions;
 
 import hwr.oop.poker.Deck;
 import hwr.oop.poker.community.cards.CommunityCards;
+import hwr.oop.poker.community.cards.CommunityCardsProvider;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -19,7 +20,7 @@ class Flop implements RoundPosition {
     }
 
     @Override
-    public CommunityCards buildCardsFor(Deck deck, CommunityCards currentCards) {
+    public CommunityCardsProvider buildCardsFor(Deck deck, CommunityCardsProvider currentCards) {
         return CommunityCards
                 .flop(deck.draw(), deck.draw(), deck.draw())
                 .noTurnNoRiver();
