@@ -29,11 +29,22 @@ public class Hand {
         this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
-        this.holeCards = new HashMap<>();
-        dealHoleCards();
-
+        this.holeCards = drawHoleCardsFromDeck();
         this.communityCards = CommunityCards.empty();
         this.rounds = Map.of(RoundPosition.PRE_FLOP, new BettingRound(players));
+    }
+
+    private Map<Player, List<Card>> drawHoleCardsFromDeck() {
+        final Map<Player, List<Card>> mutableMap = new HashMap<>();
+        for (int i = 0; i < 2; i++) {
+            for (Player player : this.players) {
+                final List<Card> cards = mutableMap
+                        .computeIfAbsent(player, p -> new ArrayList<>());
+                final Card drawnCard = this.deck.draw();
+                cards.add(drawnCard);
+            }
+        }
+        return Collections.unmodifiableMap(mutableMap);
     }
 
     private Hand(Deck deck,
@@ -124,16 +135,15 @@ public class Hand {
     private Hand accept(BettingRound round) {
         final Builder copy = copy();
         final RoundPosition currentPosition = currentPosition();
-        final BettingRound currentRound = rounds.get(currentPosition);
-        Map<RoundPosition, BettingRound> mutableMap = new HashMap<>(rounds);
-        if (currentRound.isFinished()) {
-            final RoundPosition nextPosition = currentPosition.nextPosition().orElseThrow();
-            mutableMap.put(nextPosition, round);
-        } else {
-            mutableMap.put(currentPosition, round);
-        }
-        copy.rounds(Collections.unmodifiableMap(mutableMap));
+        final var unmodifiableMap = createNewMapWith(round, currentPosition);
+        copy.rounds(unmodifiableMap);
         return copy.build();
+    }
+
+    private Map<RoundPosition, BettingRound> createNewMapWith(BettingRound round, RoundPosition currentPosition) {
+        final Map<RoundPosition, BettingRound> mutableMap = new HashMap<>(rounds);
+        mutableMap.put(currentPosition, round);
+        return Collections.unmodifiableMap(mutableMap);
     }
 
     private Builder copy() {
@@ -158,16 +168,6 @@ public class Hand {
         } else {
             final BettingRound round = rounds.get(position);
             return Optional.of(round);
-        }
-    }
-
-    private void dealHoleCards() {
-        for (int i = 0; i < 2; i++) {
-            for (Player player : players) {
-                final List<Card> cards = holeCards.computeIfAbsent(player, p -> new ArrayList<>());
-                final Card drawnCard = deck.draw();
-                cards.add(drawnCard);
-            }
         }
     }
 

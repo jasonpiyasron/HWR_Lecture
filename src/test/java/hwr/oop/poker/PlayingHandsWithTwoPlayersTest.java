@@ -182,14 +182,21 @@ class PlayingHandsWithTwoPlayersTest {
         }
 
         @Test
-        @DisplayName("pre-flop played (all check): pre-flop marked as 'played', other rounds are not played")
-        void preFlopFinished_PreFlopPlayed_IsTrue() {
+        @DisplayName("pre-flop played (all check): pre-flop marked as 'played'")
+        void preFlopFinished_PreFlopPlayed() {
             final Hand updatedHand = hand
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final boolean isPreFlopPlayed = updatedHand.preFlopRoundPlayed();
             assertThat(isPreFlopPlayed).isTrue();
+        }
 
+        @Test
+        @DisplayName("pre-flop played (all check): other rounds not marked as 'played'")
+        void preFlopFinished_OtherRoundsNotPlayed() {
+            final Hand updatedHand = hand
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
             final boolean isFlopRoundPlayed = updatedHand.flopRoundPlayed();
             final boolean isTurnPlayed = updatedHand.turnRoundPlayed();
             final boolean isRiverPlayed = updatedHand.riverRoundPlayed();
@@ -199,29 +206,43 @@ class PlayingHandsWithTwoPlayersTest {
         }
 
         @Test
-        @DisplayName("pre-flop played (all check): flop is dealt, turn and river not dealt")
-        void preFlopFinished_FlopDealt_TurnEmpty_RiverEmpty_CommunityCardsConsistOfOnlyTheFlop() {
+        @DisplayName("pre-flop played (all check): flop is dealt")
+        void preFlopFinished_FlopDealt() {
             final Hand updatedHand = hand
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<Flop> flop = updatedHand.flop();
+            final Collection<Card> dealtCommunityCards =
+                    updatedHand.communityCards().cardsDealt();
+
             assertThat(flop)
                     .isPresent().get()
                     .satisfies(fl -> assertContainsCards(fl, cardsOnFlop));
-
-            final Optional<Turn> turn = updatedHand.turn();
-            final Optional<River> river = updatedHand.river();
-            assertThat(turn).isNotPresent();
-            assertThat(river).isNotPresent();
-
-            final Collection<Card> dealtCommunityCards =
-                    updatedHand.communityCards().cardsDealt();
             assertThat(dealtCommunityCards).containsExactlyInAnyOrderElementsOf(cardsOnFlop);
         }
 
         @Test
-        @DisplayName("flop played (pre-flop & flop: all checks): pre-flop and flop marked as 'played', other rounds are not played")
-        void flopFinished_FlopAndPreFlopMarkedAsPlayed_OtherRoundsNotMarked() {
+        @DisplayName("pre-flop played (all check): turn and river not dealt")
+        void preFlopFinished_TurnAndRiverNotDealt() {
+            final Hand updatedHand = hand
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
+            final Optional<Turn> turn = updatedHand.turn();
+            final Optional<River> river = updatedHand.river();
+            final Collection<Card> dealtCommunityCards =
+                    updatedHand.communityCards().cardsDealt();
+
+            assertThat(turn).isNotPresent();
+            assertThat(river).isNotPresent();
+            assertThat(dealtCommunityCards)
+                    .isNotEmpty()
+                    .doesNotContainAnyElementsOf(cardsOnTurn)
+                    .doesNotContainAnyElementsOf(cardsOnRiver);
+        }
+
+        @Test
+        @DisplayName("flop played (pre-flop & flop: all checks): both rounds marked as 'played'")
+        void flopFinished_PreFlopAndFlopMarkedAsPlayed() {
             final Hand handAfterFlop = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking);
@@ -230,7 +251,15 @@ class PlayingHandsWithTwoPlayersTest {
             final boolean isFlopRoundPlayed = handAfterFlop.flopRoundPlayed();
             assertThat(isPreFlopPlayed).isTrue();
             assertThat(isFlopRoundPlayed).isTrue();
+        }
 
+        @Test
+        @DisplayName("flop played (pre-flop & flop: all checks): other rounds are not played")
+        void flopFinished_TurnAndRiverNotMarked() {
+            final Hand handAfterFlop = hand
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
             final boolean isTurnPlayed = handAfterFlop.turnRoundPlayed();
             final boolean isRiverPlayed = handAfterFlop.riverRoundPlayed();
             assertThat(isTurnPlayed).isFalse();
@@ -238,35 +267,48 @@ class PlayingHandsWithTwoPlayersTest {
         }
 
         @Test
-        @DisplayName("flop played (pre-flop & flop: all checks): flop and turn dealt, river not dealt")
-        void flopFinished_FlopAndTurnDealt_RiverNotDealt() {
+        @DisplayName("flop played (pre-flop & flop: all checks): flop and turn dealt")
+        void flopFinished_FlopAndTurnDealt() {
             final Hand handAfterFlop = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking);
             // then
             final Optional<Flop> flop = handAfterFlop.flop();
             final Optional<Turn> turn = handAfterFlop.turn();
+            final Collection<Card> communityCards =
+                    handAfterFlop.communityCards().cardsDealt();
+
             assertThat(flop)
                     .isPresent().get()
                     .satisfies(f -> assertContainsCards(f, cardsOnFlop));
             assertThat(turn)
                     .isPresent().get()
                     .satisfies(t -> assertContainsCards(t, cardsOnTurn));
-
-            final Optional<River> river = handAfterFlop.river();
-            assertThat(river).isNotPresent();
-
-            final Collection<Card> communityCards =
-                    handAfterFlop.communityCards().cardsDealt();
             assertThat(communityCards)
                     .containsAll(cardsOnFlop)
-                    .containsAll(cardsOnTurn)
+                    .containsAll(cardsOnTurn);
+        }
+
+        @Test
+        @DisplayName("flop played (pre-flop & flop: all checks): river not dealt")
+        void flopFinished_RiverNotDealt() {
+            final Hand handAfterFlop = hand
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
+            final Optional<River> river = handAfterFlop.river();
+            final Collection<Card> communityCards =
+                    handAfterFlop.communityCards().cardsDealt();
+
+            assertThat(river).isNotPresent();
+            assertThat(communityCards)
+                    .isNotEmpty()
                     .doesNotContainAnyElementsOf(cardsOnRiver);
         }
 
         @Test
-        @DisplayName("turn played (pre-flop, turn & flop: all checks): pre-flop, flop and turn marked as 'played', river round not played")
-        void turnFinished_PreFlopAndFlopAndTurnMarkedAsPlayed_RiverMarkedAsNotPlayed() {
+        @DisplayName("turn played (pre-flop, turn & flop: all checks): pre-flop, flop and turn marked as 'played'")
+        void turnFinished_PreFlopAndFlopAndTurnMarkedAsPlayed() {
             final Hand handAfterTurn = hand
                     .onCurrentRound(this::bothPlayersChecking)
                     .onCurrentRound(this::bothPlayersChecking)
@@ -278,7 +320,16 @@ class PlayingHandsWithTwoPlayersTest {
             assertThat(isPreFlopPlayed).isTrue();
             assertThat(isFlopRoundPlayed).isTrue();
             assertThat(isTurnPlayed).isTrue();
+        }
 
+        @Test
+        @DisplayName("turn played (pre-flop, turn & flop: all checks): river round not played")
+        void turnFinished_RiverMarkedAsNotPlayed() {
+            final Hand handAfterTurn = hand
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
             final boolean isRiverPlayed = handAfterTurn.riverRoundPlayed();
             assertThat(isRiverPlayed).isFalse();
         }
@@ -294,6 +345,9 @@ class PlayingHandsWithTwoPlayersTest {
             final Optional<Flop> flop = handAfterTurn.flop();
             final Optional<Turn> turn = handAfterTurn.turn();
             final Optional<River> river = handAfterTurn.river();
+            final Collection<Card> communityCards =
+                    handAfterTurn.communityCards().cardsDealt();
+
             assertThat(flop)
                     .isPresent().get()
                     .satisfies(t -> assertContainsCards(t, cardsOnFlop));
@@ -303,9 +357,6 @@ class PlayingHandsWithTwoPlayersTest {
             assertThat(river)
                     .isPresent().get()
                     .satisfies(r -> assertContainsCards(r, cardsOnRiver));
-
-            final Collection<Card> communityCards =
-                    handAfterTurn.communityCards().cardsDealt();
             assertThat(communityCards)
                     .containsAll(cardsOnFlop)
                     .containsAll(cardsOnTurn)
@@ -366,16 +417,16 @@ class PlayingHandsWithTwoPlayersTest {
     }
 
     @Test
-    @DisplayName("#podSize, is equal to sum of Small Blind and Big Blind")
-    void podSize_IsEqualToSumOfSmallBlindAndBigBlind() {
+    @DisplayName("#potSize, is equal to sum of Small Blind and Big Blind")
+    void potSize_IsEqualToSumOfSmallBlindAndBigBlind() {
         // given
         final BlindConfiguration config = hand.blindConfiguration();
         final long sbValue = config.smallBlind().value();
         final long bbValue = config.bigBlind().value();
         // when
-        final long podSize = hand.potSize().value();
+        final long potSize = hand.potSize().value();
         // then
-        assertThat(podSize).isEqualTo(sbValue + bbValue);
+        assertThat(potSize).isEqualTo(sbValue + bbValue);
     }
 
     @Test
