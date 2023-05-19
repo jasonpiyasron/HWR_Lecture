@@ -46,9 +46,14 @@ public class Hand implements CommunityCardsProvider {
     }
 
     private CommunityCardsProvider buildCommunityCards(Deck deck, CommunityCardsProvider oldCommunityCards) {
-        RoundPosition position = currentPosition();
-        position.ifRequiresBurn(deck::burn);
-        return position.buildCardsFor(deck, oldCommunityCards);
+        Optional<RoundPosition> optional = currentPosition();
+        if (optional.isPresent()) {
+            final RoundPosition position = optional.get();
+            position.ifRequiresBurn(deck::burn);
+            return position.buildCardsFor(deck, oldCommunityCards);
+        } else {
+            return oldCommunityCards;
+        }
     }
 
     public List<Card> holeCards(Player player) {
@@ -116,16 +121,27 @@ public class Hand implements CommunityCardsProvider {
     }
 
     public Hand onCurrentRound(UnaryOperator<BettingRound> function) {
-        final BettingRound round = roundOn(currentPosition()).orElseThrow();
-        return accept(function.apply(round));
+        final Optional<RoundPosition> optional = currentPosition();
+        if (optional.isPresent()) {
+            final var position = optional.get();
+            final var round = roundOn(position).orElseThrow();
+            return accept(function.apply(round));
+        } else {
+            throw new PlayOnOnFinishedHandException();
+        }
     }
 
     private Hand accept(BettingRound round) {
         final Builder copy = copy();
-        final RoundPosition currentPosition = currentPosition();
-        final var unmodifiableMap = createNewMapWith(round, currentPosition);
-        copy.rounds(unmodifiableMap);
-        return copy.build();
+        final Optional<RoundPosition> optional = currentPosition();
+        if (optional.isPresent()) {
+            final RoundPosition position = optional.get();
+            final var unmodifiableMap = createNewMapWith(round, position);
+            copy.rounds(unmodifiableMap);
+            return copy.build();
+        } else {
+            throw new PlayOnOnFinishedHandException();
+        }
     }
 
     private Map<RoundPosition, BettingRound> createNewMapWith(BettingRound round, RoundPosition currentPosition) {
@@ -161,23 +177,27 @@ public class Hand implements CommunityCardsProvider {
 
     private Map<RoundPosition, BettingRound> createMapBasedOn(Map<RoundPosition, BettingRound> rounds) {
         Map<RoundPosition, BettingRound> modifiableMap = new HashMap<>(rounds);
-        modifiableMap.putIfAbsent(currentPosition(rounds), new BettingRound(players));
+        final boolean riverPresentAndFinished = rounds.containsKey(RoundPosition.RIVER) && rounds.get(RoundPosition.RIVER).isFinished();
+        if (!riverPresentAndFinished) {
+            final RoundPosition roundPosition = currentPosition(rounds).orElseThrow();
+            modifiableMap.putIfAbsent(roundPosition, new BettingRound(players));
+        }
         return Collections.unmodifiableMap(modifiableMap);
     }
 
-    public RoundPosition currentPosition(Map<RoundPosition, BettingRound> someRounds) {
+    public Optional<RoundPosition> currentPosition(Map<RoundPosition, BettingRound> someRounds) {
 
         final RoundPosition candidatePosition = someRounds.keySet().stream()
                 .reduce(RoundPosition::latest).orElseThrow();
         final BettingRound candidateRound = someRounds.get(candidatePosition);
         if (candidateRound.isFinished()) {
-            return candidatePosition.nextPosition().orElseThrow();
+            return candidatePosition.nextPosition();
         } else {
-            return candidatePosition;
+            return Optional.of(candidatePosition);
         }
     }
 
-    public RoundPosition currentPosition() {
+    public Optional<RoundPosition> currentPosition() {
         return currentPosition(rounds);
     }
 
@@ -236,5 +256,8 @@ public class Hand implements CommunityCardsProvider {
             this.communityCards = communityCards;
             return this;
         }
+    }
+
+    private class PlayOnOnFinishedHandException extends RuntimeException {
     }
 }

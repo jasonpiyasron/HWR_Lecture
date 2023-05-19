@@ -359,6 +359,48 @@ class PlayingHandsWithTwoPlayersTest {
                     .containsAll(cardsOnRiver);
         }
 
+        @Test
+        @DisplayName("river played (all rounds: all checks): river round is marked as 'played'")
+        void riverFinished_RiverMarkedAsPlayed() {
+            final Hand handAfterTurn = hand
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
+            final boolean isRiverPlayed = handAfterTurn.riverRoundPlayed();
+            assertThat(isRiverPlayed).isTrue();
+        }
+
+        @Test
+        @DisplayName("river played (all rounds: all checks): flop, turn, river dealt")
+        void riverFinished_PreFlopAndFlopAndTurnAndRiverDealt() {
+            final CommunityCardsProvider handAfterTurn = hand
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking)
+                    .onCurrentRound(this::bothPlayersChecking);
+            // then
+            final Optional<Flop> flop = handAfterTurn.flop();
+            final Optional<Turn> turn = handAfterTurn.turn();
+            final Optional<River> river = handAfterTurn.river();
+            final Collection<Card> communityCards = handAfterTurn.cardsDealt();
+
+            assertThat(flop)
+                    .isPresent().get()
+                    .satisfies(t -> assertContainsCards(t, cardsOnFlop));
+            assertThat(turn)
+                    .isPresent().get()
+                    .satisfies(t -> assertContainsCards(t, cardsOnTurn));
+            assertThat(river)
+                    .isPresent().get()
+                    .satisfies(r -> assertContainsCards(r, cardsOnRiver));
+            assertThat(communityCards)
+                    .containsAll(cardsOnFlop)
+                    .containsAll(cardsOnTurn)
+                    .containsAll(cardsOnRiver);
+        }
+
         private void assertContainsCards(Card.Provider cardProvider, Collection<Card> expected) {
             assertThat(cardProvider.cards())
                     .isNotEmpty()
