@@ -1,8 +1,10 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.combinations.MatchingStrategy;
+import hwr.oop.poker.combinations.MatchingStrategyFactory;
+
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Combination {
@@ -15,66 +17,8 @@ public class Combination {
     }
 
     public Combination(List<Card> cards) {
-        final Map<Symbol, List<Card>> map = createMap(cards);
-        this.nonKickers = selectNonKickerCards(map);
-        this.kickers = selectKickers(map);
-    }
-
-    private List<Card> selectNonKickerCards(Map<Symbol, List<Card>> map) {
-        final List<Card> straightCards = straightInMap(map);
-        if (!straightCards.isEmpty()) {
-            this.label = Label.STRAIGHT;
-            return straightCards;
-        } else {
-            final List<Card> cards = selectTrippedCards(map);
-            if (cards.isEmpty()) {
-                final List<Card> selected = selectPairedCards(map);
-                if (selected.size() == 4) {
-                    this.label = Label.TWO_PAIRS;
-                } else if (selected.size() == 2) {
-                    this.label = Label.PAIR;
-                } else {
-                    this.label = Label.HIGH_CARD;
-                }
-                return selected;
-            } else {
-                this.label = Label.TRIPS;
-                return cards;
-            }
-        }
-    }
-
-    private List<Card> straightInMap(Map<Symbol, List<Card>> map) {
-        final List<Symbol> symbolsDescByStrength = map.keySet().stream()
-                .sorted(Symbol.DESCENDING_BY_STRENGTH)
-                .collect(Collectors.toList());
-        int last = -1;
-        int count = 0;
-        for (Symbol symbol : symbolsDescByStrength) {
-            if (last != -1) {
-                final int strength = symbol.strength();
-                final int strengthDiff = last - strength;
-                if (strengthDiff == 1) {
-                    count += 1;
-                } else {
-                    count = 0;
-                }
-                last = symbol.strength();
-                if (count >= 4) {
-                    break;
-                }
-            } else {
-                last = symbol.strength();
-            }
-        }
-        if (count == 4) {
-            return IntStream.range(last, last + 5)
-                    .mapToObj(Symbol::of)
-                    .map(s -> map.get(s).get(0))
-                    .collect(Collectors.toList());
-        } else {
-            return List.of();
-        }
+        this.nonKickers = selectNonKickerCards(cards);
+        this.kickers = selectKickers(cards);
     }
 
     public Combination.Label label() {
@@ -92,69 +36,32 @@ public class Combination {
         return kickers;
     }
 
-    private Map<Symbol, List<Card>> createMap(List<Card> cards) {
-        final Map<Symbol, List<Card>> mutableMap = new EnumMap<>(Symbol.class);
-        final Stream<Symbol> symbols = cards.stream()
-                .map(Card::symbol)
-                .distinct();
-        symbols.forEach(s -> mutableMap.put(s, new ArrayList<>()));
-        cards.forEach(c -> mutableMap.get(c.symbol()).add(c));
-        return Collections.unmodifiableMap(mutableMap);
-    }
-
-    private List<Card> selectPairedCards(Map<Symbol, List<Card>> map) {
-        final List<Symbol> symbolsWithPairs = symbolsWithPairs(map)
-                .sorted((first, second) -> Integer.compare(second.strength(), first.strength()))
-                .collect(Collectors.toList());
-        final boolean moreThanTwoPairs = symbolsWithPairs.size() > 2;
-        if (moreThanTwoPairs) {
-            final List<Symbol> selectedSymbols = symbolsWithPairs.subList(0, 2);
-            return cardsOfSymbols(selectedSymbols, map);
-        } else {
-            return cardsOfSymbols(symbolsWithPairs, map);
+    private List<Card> selectNonKickerCards(List<Card> cards) {
+        MatchingStrategyFactory factory = new MatchingStrategyFactory();
+        final List<MatchingStrategy> strategies = List.of(
+                factory.createFlush(),
+                factory.createStraight(),
+                factory.createTrips(),
+                factory.createTwoPair(),
+                factory.createSinglePair()
+        );
+        for (MatchingStrategy strategy : strategies) {
+            final MatchingStrategy.Result result = strategy.match(cards);
+            if (result.successful()) {
+                this.label = result.label();
+                return result.winner();
+            }
         }
+        this.label = Label.HIGH_CARD;
+        return List.of();
     }
 
-    private List<Card> cardsOfSymbols(List<Symbol> symbols, Map<Symbol, List<Card>> map) {
-        return symbols.stream()
-                .map(map::get)
-                .flatMap(Collection::stream)
+    private List<Card> selectKickers(List<Card> cards) {
+        final List<Card> kickerCandidates = cards.stream()
+                .filter(c -> !nonKickers.contains(c))
+                .sorted(Card.DESCENDING_BY_SYMBOL_STRENGTH)
                 .collect(Collectors.toList());
-    }
-
-    private List<Card> selectTrippedCards(Map<Symbol, List<Card>> map) {
-        return symbolsWithTrips(map)
-                .map(map::get)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-    }
-
-    private Stream<Symbol> selectNonPairs(Map<Symbol, List<Card>> map) {
-        return map.entrySet().stream()
-                .filter(e -> e.getValue().size() == 1)
-                .map(Map.Entry::getKey);
-    }
-
-    private Stream<Symbol> symbolsWithPairs(Map<Symbol, List<Card>> map) {
-        return map.entrySet().stream()
-                .filter(e -> e.getValue().size() == 2)
-                .map(Map.Entry::getKey);
-    }
-
-    private Stream<Symbol> symbolsWithTrips(Map<Symbol, List<Card>> map) {
-        return map.entrySet().stream()
-                .filter(e -> e.getValue().size() == 3)
-                .map(Map.Entry::getKey);
-    }
-
-    private List<Card> selectKickers(Map<Symbol, List<Card>> mutableMap) {
-        final List<Symbol> descSortedNonPairedSymbols = selectNonPairs(mutableMap)
-                .sorted((first, second) -> Integer.compare(second.strength(), first.strength()))
-                .collect(Collectors.toList());
-        final List<Card> allKickers = descSortedNonPairedSymbols.stream()
-                .map(s -> mutableMap.get(s).get(0))
-                .collect(Collectors.toList());
-        return allKickers.subList(0, numberOfKickersRequired());
+        return kickerCandidates.subList(0, numberOfKickersRequired());
     }
 
     private int numberOfKickersRequired() {
@@ -162,7 +69,7 @@ public class Combination {
     }
 
     public enum Label {
-        HIGH_CARD(0), PAIR(1), TWO_PAIRS(2), TRIPS(3), STRAIGHT(4);
+        HIGH_CARD(0), PAIR(1), TWO_PAIRS(2), TRIPS(3), STRAIGHT(4), FLUSH(5);
 
         private final int strength;
 

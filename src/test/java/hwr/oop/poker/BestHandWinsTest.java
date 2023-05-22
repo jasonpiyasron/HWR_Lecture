@@ -1,7 +1,10 @@
 package hwr.oop.poker;
 
+import hwr.oop.poker.combinations.MatchingStrategy;
+import hwr.oop.poker.combinations.MatchingStrategyFactory;
 import hwr.oop.poker.testing.Converter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -70,6 +73,33 @@ class BestHandWinsTest {
         assertThat(kickers).containsExactlyElementsOf(expectedKickers);
     }
 
+    @ParameterizedTest(name = "pair strategy, cards ({0}), combination ({1})")
+    @CsvSource(delimiter = '-', value = {
+            "2H,4S,6D,8C,TH,TS,QD - TH,TS",
+            "AS,AC,KD,JH,TS,2C,4C - AS,AC",
+            "KC,JD,9C,7H,5D,TS,KH - KC,KH",
+    })
+    void singlePairs_IndividualStrategy(String inputCards, String combination) {
+        final List<Card> cards = converter.convert(inputCards);
+        final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+        final MatchingStrategy pairStrategy = factory.createSinglePair();
+        MatchingStrategy.Result result = pairStrategy.match(cards);
+
+        // match successful
+        final boolean success = result.successful();
+        assertThat(success).isTrue();
+
+        // correct label
+        final Combination.Label label = result.label();
+        assertThat(label).isEqualTo(Combination.Label.PAIR);
+
+        // correct combination cards in correct order
+        final List<Card> expectedBestCombination = converter.convert(combination);
+        final List<Card> combinationCards = result.winner();
+        assertThat(combinationCards)
+                .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+    }
+
     @ParameterizedTest(name = "cards ({0}), combination ({1}), kickers ({2})")
     @CsvSource(delimiter = '-', value = {
             "AS,AD,KS,KD,2C,3C,4C - AS,AD,KS,KD,4C - 4C",
@@ -125,6 +155,8 @@ class BestHandWinsTest {
     @ParameterizedTest(name = "cards ({0}), combination ({1}), no kickers")
     @CsvSource(delimiter = '-', value = {
             "AS,KC,QH,JD,TS,3C,4H - AS,KC,QH,JD,TS",
+            "9C,2H,TS,8H,JD,QH,AS - QH,JD,TS,9C,8H",
+            "5D,2H,4S,6H,7C,3C,8S - 8S,7C,6H,5D,4S",
     })
     void straights(String inputCards, String bestCombinationString) {
         final List<Card> cards = converter.convert(inputCards);
@@ -144,4 +176,144 @@ class BestHandWinsTest {
         final List<Card> kickers = combination.kickers();
         assertThat(kickers).isEmpty();
     }
+
+    @Nested
+    class IndividualStrategyTest {
+        @ParameterizedTest(name = "pair strategy, cards ({0}), combination ({1})")
+        @CsvSource(delimiter = '-', value = {
+                "2H,4S,6D,8C,TH,TS,QD - TH,TS",
+                "AS,AC,KD,JH,TS,2C,4C - AS,AC",
+                "KC,JD,9C,7H,5D,TS,KH - KC,KH",
+        })
+        void singlePairs_IndividualStrategy(String inputCards, String combination) {
+            final List<Card> cards = converter.convert(inputCards);
+            final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+            final MatchingStrategy pairStrategy = factory.createSinglePair();
+            MatchingStrategy.Result result = pairStrategy.match(cards);
+
+            // match successful
+            final boolean success = result.successful();
+            assertThat(success).isTrue();
+
+            // correct label
+            final Combination.Label label = result.label();
+            assertThat(label).isEqualTo(Combination.Label.PAIR);
+
+            // correct combination cards in correct order
+            final List<Card> expectedBestCombination = converter.convert(combination);
+            final List<Card> combinationCards = result.winner();
+            assertThat(combinationCards)
+                    .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+        }
+
+        @ParameterizedTest(name = "two pair strategy, cards ({0}), combination ({1})")
+        @CsvSource(delimiter = '-', value = {
+                "AS,AD,KS,KD,2C,3C,4C - AS,AD,KS,KD",
+                "2S,3S,6C,JC,JH,QS,QD - QS,QD,JC,JH",
+                "2C,2H,6C,6H,KC,KH,AS - KC,KH,6C,6H",
+        })
+        void twoPairs_IndividualStrategy(String inputCards, String combination) {
+            final List<Card> cards = converter.convert(inputCards);
+            final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+            final MatchingStrategy pairStrategy = factory.createTwoPair();
+            MatchingStrategy.Result result = pairStrategy.match(cards);
+
+            // match successful
+            final boolean success = result.successful();
+            assertThat(success).isTrue();
+
+            // correct label
+            final Combination.Label label = result.label();
+            assertThat(label).isEqualTo(Combination.Label.TWO_PAIRS);
+
+            // correct combination cards in correct order
+            final List<Card> expectedBestCombination = converter.convert(combination);
+            final List<Card> combinationCards = result.winner();
+            assertThat(combinationCards)
+                    .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+        }
+
+        @ParameterizedTest(name = "trip strategy, cards ({0}), combination ({1})")
+        @CsvSource(delimiter = '-', value = {
+                "AS,AD,AC,2C,3C,5C,6S - AS,AD,AC",
+                "AH,KD,8H,8D,8S,3C,2S - 8H,8D,8S",
+                "JH,QD,KC,AS,2H,2D,2S - 2H,2D,2S",
+        })
+        void trips_IndividualStrategy(String inputCards, String combination) {
+            final List<Card> cards = converter.convert(inputCards);
+            final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+            final MatchingStrategy pairStrategy = factory.createTrips();
+            MatchingStrategy.Result result = pairStrategy.match(cards);
+
+            // match successful
+            final boolean success = result.successful();
+            assertThat(success).isTrue();
+
+            // correct label
+            final Combination.Label label = result.label();
+            assertThat(label).isEqualTo(Combination.Label.TRIPS);
+
+            // correct combination cards in correct order
+            final List<Card> expectedBestCombination = converter.convert(combination);
+            final List<Card> combinationCards = result.winner();
+            assertThat(combinationCards)
+                    .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+        }
+
+        @ParameterizedTest(name = "straight strategy, cards ({0}), combination ({1})")
+        @CsvSource(delimiter = '-', value = {
+                "AS,KC,QH,JD,TS,3C,4H - AS,KC,QH,JD,TS",
+                "9C,2H,TS,8H,JD,QH,AS - QH,JD,TS,9C,8H",
+                "5D,2H,4S,6H,7C,3C,8S - 8S,7C,6H,5D,4S",
+        })
+        void straights_IndividualStrategy(String inputCards, String combination) {
+            final List<Card> cards = converter.convert(inputCards);
+            final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+            final MatchingStrategy pairStrategy = factory.createStraight();
+            MatchingStrategy.Result result = pairStrategy.match(cards);
+
+            // match successful
+            final boolean success = result.successful();
+            assertThat(success).isTrue();
+
+            // correct label
+            final Combination.Label label = result.label();
+            assertThat(label).isEqualTo(Combination.Label.STRAIGHT);
+
+            // correct combination cards in correct order
+            final List<Card> expectedBestCombination = converter.convert(combination);
+            final List<Card> combinationCards = result.winner();
+            assertThat(combinationCards)
+                    .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+        }
+
+        @ParameterizedTest(name = "flush strategy, cards ({0}), combination ({1})")
+        @CsvSource(delimiter = '-', value = {
+                "JS,AS,7S,KS,QS,8S,9S - AS,KS,QS,JS,9S",
+                "3D,TD,KD,6D,2D,QD,7D - KD,QD,TD,7D,6D",
+                "JH,TH,KD,AH,QD,9H,3H - AH,JH,TH,9H,3H",
+        })
+        void flush_IndividualStrategy(String inputCards, String combination) {
+            final List<Card> cards = converter.convert(inputCards);
+            final MatchingStrategyFactory factory = MatchingStrategyFactory.create();
+            final MatchingStrategy pairStrategy = factory.createFlush();
+            MatchingStrategy.Result result = pairStrategy.match(cards);
+
+            // match successful
+            final boolean success = result.successful();
+            assertThat(success).isTrue();
+
+            // correct label
+            final Combination.Label label = result.label();
+            assertThat(label).isEqualTo(Combination.Label.FLUSH);
+
+            // correct combination cards in correct order
+            final List<Card> expectedBestCombination = converter.convert(combination);
+            final List<Card> combinationCards = result.winner();
+            assertThat(combinationCards)
+                    .containsExactlyInAnyOrderElementsOf(expectedBestCombination);
+        }
+    }
+
 }
+

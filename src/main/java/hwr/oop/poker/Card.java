@@ -1,5 +1,6 @@
 package hwr.oop.poker;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -45,4 +46,7 @@ public class Card {
     public interface Provider {
         Stream<Card> cards();
     }
+
+    public static final Comparator<Card> DESCENDING_BY_SYMBOL_STRENGTH =
+            (o1, o2) -> Integer.compare(o2.symbol().strength(), o1.symbol().strength());
 }

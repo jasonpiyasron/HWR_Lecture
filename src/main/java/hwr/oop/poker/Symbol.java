@@ -18,8 +18,8 @@ public enum Symbol {
     KING("K", 13),
     ACE("A", 14);
 
-    public static Comparator<Symbol> ASCENDING_BY_STRENGTH = Comparator.comparingInt(Symbol::strength);
-    public static Comparator<Symbol> DESCENDING_BY_STRENGTH = (o1, o2) -> Integer.compare(o2.strength(), o1.strength());
+    public static final Comparator<Symbol> ASCENDING_BY_STRENGTH = Comparator.comparingInt(Symbol::strength);
+    public static final Comparator<Symbol> DESCENDING_BY_STRENGTH = (o1, o2) -> Integer.compare(o2.strength(), o1.strength());
 
     private final String stringRepresentation;
     private final int strength;
