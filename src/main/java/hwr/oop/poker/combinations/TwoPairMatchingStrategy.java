@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 
 import static hwr.oop.poker.Combination.Label.TWO_PAIRS;
 
-class TwoPairMatchingStrategy implements MatchingStrategy {
-    private final AnalysisHelper helper;
+class TwoPairMatchingStrategy implements CombinationDetectionStrategy {
+    private final CombinationAnalysisSupport helper;
 
-    public TwoPairMatchingStrategy(AnalysisHelper helper) {
+    public TwoPairMatchingStrategy(CombinationAnalysisSupport helper) {
         this.helper = helper;
     }
 

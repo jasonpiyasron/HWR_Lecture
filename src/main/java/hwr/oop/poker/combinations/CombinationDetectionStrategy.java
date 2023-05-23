@@ -5,7 +5,7 @@ import hwr.oop.poker.Combination;
 
 import java.util.List;
 
-public interface MatchingStrategy {
+public interface CombinationDetectionStrategy {
 
     Result match(List<Card> cards);
 
@@ -13,11 +13,11 @@ public interface MatchingStrategy {
         private final List<List<Card>> candidates;
         private final Combination.Label label;
 
-        public static Result success(Combination.Label label, List<List<Card>> alternatives) {
+        static Result success(Combination.Label label, List<List<Card>> alternatives) {
             return new Result(alternatives, label);
         }
 
-        public static Result failure(Combination.Label label) {
+        static Result failure(Combination.Label label) {
             return new Result(null, label);
         }
 

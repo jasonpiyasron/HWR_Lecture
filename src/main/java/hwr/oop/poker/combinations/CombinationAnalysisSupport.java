@@ -8,12 +8,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AnalysisHelper {
+public class CombinationAnalysisSupport {
 
 
     private Map<Symbol, List<Card>> map;
 
-    public AnalysisHelper() {
+    public CombinationAnalysisSupport() {
         this.map = null;
     }
 
@@ -25,6 +25,11 @@ public class AnalysisHelper {
     public Stream<Symbol> symbolsWithTrips(List<Card> cards) {
         lazyInitializeMapIfRequired(cards);
         return symbolsThatArePresent(3);
+    }
+
+    public Stream<Symbol> symbolsWithQuads(List<Card> cards) {
+        lazyInitializeMapIfRequired(cards);
+        return symbolsThatArePresent(4);
     }
 
     public List<Card> cardsWith(List<Card> cards, Symbol... symbols) {

@@ -1,33 +1,60 @@
 package hwr.oop.poker.combinations;
 
+import java.util.List;
+
 public class MatchingStrategyFactory {
-    private final AnalysisHelper helper;
+    private final CombinationAnalysisSupport analysisSupport;
 
     public static MatchingStrategyFactory create() {
         return new MatchingStrategyFactory();
     }
 
     public MatchingStrategyFactory() {
-        this.helper = new AnalysisHelper();
+        this.analysisSupport = new CombinationAnalysisSupport();
     }
 
-    public MatchingStrategy createSinglePair() {
-        return new PairMatchingStrategy(helper);
+    public List<CombinationDetectionStrategy> all() {
+        return List.of(
+                createSinglePair(),
+                createTwoPair(),
+                createTrips(),
+                createStraight(),
+                createFlush(),
+                createFullHouse(),
+                createQuads(),
+                createStraightFlush()
+        );
     }
 
-    public MatchingStrategy createTwoPair() {
-        return new TwoPairMatchingStrategy(helper);
+    public CombinationDetectionStrategy createSinglePair() {
+        return new PairMatchingStrategy(analysisSupport);
     }
 
-    public MatchingStrategy createTrips() {
-        return new TripMatchingStrategy(helper);
+    public CombinationDetectionStrategy createTwoPair() {
+        return new TwoPairMatchingStrategy(analysisSupport);
     }
 
-    public MatchingStrategy createStraight() {
-        return new StraightMatchingStrategy(helper);
+    public CombinationDetectionStrategy createTrips() {
+        return new TripMatchingStrategy(analysisSupport);
     }
 
-    public MatchingStrategy createFlush() {
-        return new FlushMatchingStrategy(helper);
+    public CombinationDetectionStrategy createStraight() {
+        return new StraightMatchingStrategy(analysisSupport);
+    }
+
+    public CombinationDetectionStrategy createFlush() {
+        return new FlushMatchingStrategy(analysisSupport);
+    }
+
+    public CombinationDetectionStrategy createFullHouse() {
+        return new FullHouseMatchingStrategy(createSinglePair(), createTrips());
+    }
+
+    public CombinationDetectionStrategy createQuads() {
+        return new QuadsMatchinStrategy(analysisSupport);
+    }
+
+    public CombinationDetectionStrategy createStraightFlush() {
+        return new StraightFlushMatchingStrategy(createStraight());
     }
 }

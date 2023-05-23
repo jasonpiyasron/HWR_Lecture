@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-class FlushMatchingStrategy implements MatchingStrategy {
-    private final AnalysisHelper helper;
+class FlushMatchingStrategy implements CombinationDetectionStrategy {
+    private final CombinationAnalysisSupport helper;
 
-    public FlushMatchingStrategy(AnalysisHelper helper) {
+    public FlushMatchingStrategy(CombinationAnalysisSupport helper) {
         this.helper = helper;
     }
 

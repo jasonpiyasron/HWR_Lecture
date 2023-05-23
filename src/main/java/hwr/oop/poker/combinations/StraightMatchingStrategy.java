@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-class StraightMatchingStrategy implements MatchingStrategy {
-    private final AnalysisHelper helper;
+class StraightMatchingStrategy implements CombinationDetectionStrategy {
+    private final CombinationAnalysisSupport helper;
 
-    public StraightMatchingStrategy(AnalysisHelper helper) {
+    public StraightMatchingStrategy(CombinationAnalysisSupport helper) {
         this.helper = helper;
     }
 

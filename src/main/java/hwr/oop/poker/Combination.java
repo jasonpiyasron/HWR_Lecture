@@ -1,11 +1,11 @@
 package hwr.oop.poker;
 
-import hwr.oop.poker.combinations.MatchingStrategy;
+import hwr.oop.poker.combinations.CombinationDetectionStrategy;
 import hwr.oop.poker.combinations.MatchingStrategyFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Combination {
     private final List<Card> nonKickers;
@@ -38,15 +38,15 @@ public class Combination {
 
     private List<Card> selectNonKickerCards(List<Card> cards) {
         MatchingStrategyFactory factory = new MatchingStrategyFactory();
-        final List<MatchingStrategy> strategies = List.of(
+        final List<CombinationDetectionStrategy> strategies = List.of(
                 factory.createFlush(),
                 factory.createStraight(),
                 factory.createTrips(),
                 factory.createTwoPair(),
                 factory.createSinglePair()
         );
-        for (MatchingStrategy strategy : strategies) {
-            final MatchingStrategy.Result result = strategy.match(cards);
+        for (CombinationDetectionStrategy strategy : strategies) {
+            final CombinationDetectionStrategy.Result result = strategy.match(cards);
             if (result.successful()) {
                 this.label = result.label();
                 return result.winner();
@@ -69,7 +69,7 @@ public class Combination {
     }
 
     public enum Label {
-        HIGH_CARD(0), PAIR(1), TWO_PAIRS(2), TRIPS(3), STRAIGHT(4), FLUSH(5);
+        HIGH_CARD(0), PAIR(1), TWO_PAIRS(2), TRIPS(3), STRAIGHT(4), FLUSH(5), FULL_HOUSE(6), QUADS(7), STRAIGHT_FLUSH(8);
 
         private final int strength;
 

@@ -7,10 +7,10 @@ import hwr.oop.poker.Symbol;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class PairMatchingStrategy implements MatchingStrategy {
-    private final AnalysisHelper helper;
+class PairMatchingStrategy implements CombinationDetectionStrategy {
+    private final CombinationAnalysisSupport helper;
 
-    public PairMatchingStrategy(AnalysisHelper helper) {
+    public PairMatchingStrategy(CombinationAnalysisSupport helper) {
         this.helper = helper;
     }
 
