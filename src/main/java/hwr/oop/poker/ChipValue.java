@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public interface ChipValue extends Comparable<ChipValue> {
     static ChipValue of(long value) {
-        return new SimpleChipValue(value);
+        return new PositiveChipValue(value);
     }
 
     static ChipValue zero() {
@@ -34,11 +34,19 @@ public interface ChipValue extends Comparable<ChipValue> {
         return compareTo(minRaise) < 0;
     }
 
-    class SimpleChipValue implements ChipValue {
+    class PositiveChipValue implements ChipValue {
         private final long value;
 
-        public SimpleChipValue(long value) {
+        public PositiveChipValue(long value) {
+            assertIsPositive(value);
             this.value = value;
+        }
+
+        private void assertIsPositive(long value) {
+            if (value < 0) {
+                throw new NegativeChipCountException("Can not create chip value below 0," +
+                        " but tried to create chip value of " + value);
+            }
         }
 
         @Override
@@ -54,7 +62,7 @@ public interface ChipValue extends Comparable<ChipValue> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            SimpleChipValue that = (SimpleChipValue) o;
+            PositiveChipValue that = (PositiveChipValue) o;
             return value == that.value;
         }
 
@@ -68,4 +76,12 @@ public interface ChipValue extends Comparable<ChipValue> {
             return "ChipValue{" + value + '}';
         }
     }
+
+    class NegativeChipCountException extends RuntimeException {
+
+        public NegativeChipCountException(String message) {
+            super(message);
+        }
+    }
+
 }

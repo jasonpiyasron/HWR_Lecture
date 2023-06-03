@@ -10,7 +10,7 @@ public class HoleCards {
         return new HoleCards(deck, players);
     }
 
-    public HoleCards(Deck deck, List<Player> players) {
+    private HoleCards(Deck deck, List<Player> players) {
         this.assignment = drawHoleCardsFromDeck(deck, players);
     }
 
@@ -19,12 +19,11 @@ public class HoleCards {
     }
 
     private Map<Player, List<Card>> drawHoleCardsFromDeck(Deck deck, List<Player> players) {
-        final var mutableMap = drawCards(deck, players);
-        convertToImmutableLists(mutableMap);
-        return Collections.unmodifiableMap(mutableMap);
+        final var mutableMap = drawCardsToMutableMap(deck, players);
+        return convertToImmutableMap(mutableMap);
     }
 
-    private Map<Player, List<Card>> drawCards(Deck deck, List<Player> players) {
+    private Map<Player, List<Card>> drawCardsToMutableMap(Deck deck, List<Player> players) {
         final Map<Player, List<Card>> mutableMap = new HashMap<>();
         for (int i = 0; i < 2; i++) {
             for (Player player : players) {
@@ -37,12 +36,18 @@ public class HoleCards {
         return mutableMap;
     }
 
-    private void convertToImmutableLists(Map<Player, List<Card>> mutableMap) {
-        for (Map.Entry<Player, List<Card>> entry : mutableMap.entrySet()) {
+    private Map<Player, List<Card>> convertToImmutableMap(Map<Player, List<Card>> mutableMap) {
+        final var mutableMapOfImmutableLists = convertToImmutableLists(mutableMap);
+        return Collections.unmodifiableMap(mutableMapOfImmutableLists);
+    }
+
+    private Map<Player, List<Card>> convertToImmutableLists(Map<Player, List<Card>> mutableMap) {
+        for (var entry : mutableMap.entrySet()) {
             final var player = entry.getKey();
             final var cards = entry.getValue();
             final var immutableLIst = List.copyOf(cards);
             mutableMap.put(player, immutableLIst);
         }
+        return mutableMap;
     }
 }

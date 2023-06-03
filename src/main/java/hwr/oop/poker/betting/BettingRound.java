@@ -2,29 +2,50 @@ package hwr.oop.poker.betting;
 
 import hwr.oop.poker.ChipValue;
 import hwr.oop.poker.Player;
+import hwr.oop.poker.Stacks;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BettingRound {
     private final List<Player> players;
+    private final Stacks stacks;
     private final List<Play> plays;
     private final Player turn;
 
-    public BettingRound(List<Player> players) {
+    /**
+     * @deprecated because rounds without stacks for players do not make sense!
+     */
+    @Deprecated(forRemoval = true)
+    public static BettingRound create(List<Player> players) {
+        return new BettingRound(players);
+    }
+
+    public static BettingRound create(Stacks stackProvider, Player... players) {
+        return new BettingRound(Arrays.asList(players), stackProvider);
+    }
+
+    public BettingRound(List<Player> players, Stacks stacks) {
         this.players = players;
+        this.stacks = stacks;
         this.plays = new ArrayList<>();
         this.turn = players.get(0);
     }
 
-    private BettingRound(List<Player> players, Stream<Play> plays, Player turn) {
+    /**
+     * @deprecated because rounds without stacks for players do not make sense!
+     */
+    @Deprecated(forRemoval = true)
+    private BettingRound(List<Player> players) {
+        this(players, null);
+    }
+
+    private BettingRound(List<Player> players, Stream<Play> plays, Player turn, Stacks stacks) {
         this.players = players;
         this.plays = plays.collect(Collectors.toList());
         this.turn = turn;
+        this.stacks = stacks;
     }
 
     public RoundInContext with(Player player) {
@@ -90,10 +111,13 @@ public class BettingRound {
 
     public BettingRound nextState(Play play) {
         assertCorrectPlayer(play);
+        final var updatedStacks = stacks == null ? null : stacks.apply(play);  // TODO Remove this once deprecated constructors are removed
+        final var playsIncludingNewOne = Stream.concat(plays.stream(), Stream.of(play));
         return new BettingRound(
                 players,
-                Stream.concat(plays.stream(), Stream.of(play)),
-                next(turn)
+                playsIncludingNewOne,
+                next(turn),
+                updatedStacks
         );
     }
 
@@ -162,6 +186,10 @@ public class BettingRound {
 
     private boolean hasPlayerNotFolded(Player player) {
         return plays.stream().noneMatch(play -> play.playedBy(player) && play.isFold());
+    }
+
+    public ChipValue remainingChips(Player player) {
+        return stacks.ofPlayer(player);
     }
 
     public static class InvalidPlayOnStateException extends RuntimeException {

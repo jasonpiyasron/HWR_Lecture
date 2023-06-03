@@ -421,7 +421,7 @@ class PlayingHandsWithTwoPlayersTest {
 
             assertThat(flop)
                     .isPresent().get()
-                    .satisfies(t -> assertContainsCards(t, cardsOnFlop));
+                    .satisfies(f -> assertContainsCards(f, cardsOnFlop));
             assertThat(turn)
                     .isPresent().get()
                     .satisfies(t -> assertContainsCards(t, cardsOnTurn));
@@ -451,48 +451,6 @@ class PlayingHandsWithTwoPlayersTest {
             assertThat(cardProvider.cards())
                     .isNotEmpty()
                     .allMatch(expected::contains);
-        }
-
-        @Test
-        @Disabled("Flop finished: Turn becomes visible, not yet implemented")
-        void flopFinished_TurnNoLongerEmpty() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("Flop finished: River is still hidden, not yet implemented")
-        void flopFinished_RiverIsStillEmpty() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("Flop finished: Two more betting rounds, not yet implemented")
-        void flopFinished_TwoMoreBettingRound() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("Turn finished: River becomes visible, not yet implemented")
-        void turnFinished_RiverNoLongerEmpty() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("Turn finished: One more betting rounds, not yet implemented")
-        void turnFinished_OneMoreBettingRound() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("River finished: All cards visible, not yet implemented")
-        void turnFinished_AllCommunityCardsVisible() {
-            Assertions.fail("Not yet implemented");
-        }
-
-        @Test
-        @Disabled("River finished: No more betting rounds, not yet implemented")
-        void riverFinished_NoMoreBettingRoundsRequired() {
-            Assertions.fail("Not yet implemented");
         }
 
         private BettingRound bothPlayersChecking(BettingRound round) {

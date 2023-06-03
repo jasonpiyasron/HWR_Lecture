@@ -29,7 +29,7 @@ class BettingRoundsHappyPathTest {
                 secondPlayer,
                 thirdPlayer
         );
-        round = new BettingRound(allPlayers);
+        round = BettingRound.create(allPlayers);
     }
 
     @Test

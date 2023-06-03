@@ -25,7 +25,7 @@ class WrongPlaysOnBettingRoundsTest {
                 secondPlayer,
                 thirdPlayer
         );
-        round = new BettingRound(players);
+        round = BettingRound.create(players);
     }
 
     @Test

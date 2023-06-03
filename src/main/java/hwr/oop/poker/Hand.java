@@ -28,7 +28,7 @@ public class Hand implements CommunityCardsProvider {
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = HoleCards.create(deck, players);
         this.communityCards = CommunityCards.empty();
-        this.rounds = Map.of(RoundPosition.PRE_FLOP, new BettingRound(players));
+        this.rounds = Map.of(RoundPosition.PRE_FLOP, BettingRound.create(players));
     }
 
     private Hand(Deck deck,
@@ -180,8 +180,9 @@ public class Hand implements CommunityCardsProvider {
         Map<RoundPosition, BettingRound> modifiableMap = new HashMap<>(rounds);
         final boolean riverPresentAndFinished = rounds.containsKey(RoundPosition.RIVER) && rounds.get(RoundPosition.RIVER).isFinished();
         if (!riverPresentAndFinished) {
-            final RoundPosition roundPosition = currentPosition(rounds).orElseThrow();
-            modifiableMap.putIfAbsent(roundPosition, new BettingRound(players));
+            final var roundPosition = currentPosition(rounds).orElseThrow();
+            final var freshBettingRound = BettingRound.create(players);
+            modifiableMap.putIfAbsent(roundPosition, freshBettingRound);
         }
         return Collections.unmodifiableMap(modifiableMap);
     }
