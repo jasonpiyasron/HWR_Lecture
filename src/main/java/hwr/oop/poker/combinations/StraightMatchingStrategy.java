@@ -2,7 +2,6 @@ package hwr.oop.poker.combinations;
 
 import hwr.oop.poker.Card;
 import hwr.oop.poker.Color;
-import hwr.oop.poker.Combination;
 import hwr.oop.poker.Symbol;
 
 import java.util.List;
@@ -11,38 +10,41 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-class StraightMatchingStrategy implements CombinationDetectionStrategy {
-    private final CombinationAnalysisSupport helper;
+import static hwr.oop.poker.Combination.Label.STRAIGHT;
 
-    public StraightMatchingStrategy(CombinationAnalysisSupport helper) {
-        this.helper = helper;
+class StraightMatchingStrategy implements CombinationDetectionStrategy {
+    private final AnalysisFlyweightFactory flyweightFactory;
+
+    public StraightMatchingStrategy(AnalysisFlyweightFactory flyweightFactory) {
+        this.flyweightFactory = flyweightFactory;
     }
 
     @Override
     public Result match(List<Card> cards) {
-        final List<Symbol> symbols = helper.distinctSymbolsDesc(cards);
+        final var helper = flyweightFactory.get(cards);
+        final List<Symbol> symbols = helper.distinctSymbolsDesc();
         final int numberOfSymbols = symbols.size();
         final boolean enoughSymbolsForStraight = numberOfSymbols >= 5;
         if (!enoughSymbolsForStraight) {
-            return Result.failure(Combination.Label.STRAIGHT);
+            return Result.failure(STRAIGHT);
         } else {
-            final var candidates = straightCandidates(cards);
+            final var candidates = straightCandidates(helper);
             if (candidates.isEmpty()) {
-                return Result.failure(Combination.Label.STRAIGHT);
+                return Result.failure(STRAIGHT);
             } else {
-                return Result.success(Combination.Label.STRAIGHT, candidates);
+                return Result.success(STRAIGHT, candidates);
             }
         }
     }
 
-    private List<List<Card>> straightCandidates(List<Card> cards) {
-        final List<Symbol> symbols = helper.distinctSymbolsDesc(cards);
+    private List<List<Card>> straightCandidates(AnalysisFlyweight helper) {
+        final List<Symbol> symbols = helper.distinctSymbolsDesc();
         return straightCandidateRanges(symbols, symbols.size())
                 .mapToObj(i -> symbols.subList(i, i + 5))
                 .map(candidateSymbols -> {
-                    final var cardsWithSymbols = helper.cardsWith(cards, candidateSymbols);
+                    final var cardsWithSymbols = helper.cardsWith(candidateSymbols);
                     final var mostCommonColor = mostCommonColor(cardsWithSymbols);
-                    return nestedListWithCardsOfSingleSymbol(cards, candidateSymbols)
+                    return nestedListWithCardsOfSingleSymbol(helper, candidateSymbols)
                             .map(list -> pickCardOfCorrectColor(mostCommonColor, list))
                             .collect(Collectors.toList());
                 })
@@ -69,9 +71,9 @@ class StraightMatchingStrategy implements CombinationDetectionStrategy {
         }
     }
 
-    private Stream<List<Card>> nestedListWithCardsOfSingleSymbol(List<Card> cards, List<Symbol> candidateSymbols) {
+    private Stream<List<Card>> nestedListWithCardsOfSingleSymbol(AnalysisFlyweight helper, List<Symbol> candidateSymbols) {
         return candidateSymbols.stream()
-                .map(symbol -> helper.cardsWith(cards, symbol));
+                .map(helper::cardsWith);
     }
 
     private Map<Color, Long> colorCountMap(List<Card> cardsWithSymbols) {

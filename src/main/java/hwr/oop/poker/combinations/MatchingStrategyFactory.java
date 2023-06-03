@@ -3,14 +3,14 @@ package hwr.oop.poker.combinations;
 import java.util.List;
 
 public class MatchingStrategyFactory {
-    private final CombinationAnalysisSupport analysisSupport;
+    private final AnalysisFlyweightFactory analysisFlyweightFactory;
 
     public static MatchingStrategyFactory create() {
         return new MatchingStrategyFactory();
     }
 
     public MatchingStrategyFactory() {
-        this.analysisSupport = new CombinationAnalysisSupport();
+        this.analysisFlyweightFactory = new AnalysisFlyweightFactory();
     }
 
     public List<CombinationDetectionStrategy> all() {
@@ -27,23 +27,23 @@ public class MatchingStrategyFactory {
     }
 
     public CombinationDetectionStrategy createSinglePair() {
-        return new PairMatchingStrategy(analysisSupport);
+        return new PairMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createTwoPair() {
-        return new TwoPairMatchingStrategy(analysisSupport);
+        return new TwoPairMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createTrips() {
-        return new TripMatchingStrategy(analysisSupport);
+        return new TripMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createStraight() {
-        return new StraightMatchingStrategy(analysisSupport);
+        return new StraightMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createFlush() {
-        return new FlushMatchingStrategy(analysisSupport);
+        return new FlushMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createFullHouse() {
@@ -51,7 +51,7 @@ public class MatchingStrategyFactory {
     }
 
     public CombinationDetectionStrategy createQuads() {
-        return new QuadsMatchinStrategy(analysisSupport);
+        return new QuadsMatchingStrategy(analysisFlyweightFactory);
     }
 
     public CombinationDetectionStrategy createStraightFlush() {
