@@ -5,6 +5,7 @@ import hwr.oop.poker.betting.Play;
 import hwr.oop.poker.blinds.SmallBlind;
 import hwr.oop.poker.decks.RandomDeck;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StacksForPlayersTest {
 
@@ -119,6 +121,24 @@ class StacksForPlayersTest {
             final var remainingChips = roundAfterBet.remainingChips(firstPlayer);
             assertThat(remainingChips).isEqualTo(ChipValue.of(80));
         }
+
+
+        @Test
+        @Disabled("Player 1 has more than Player 2, all in + call," +
+                " Player 1 has 0 chips left, Player 2 has some chips left not yet implemented")
+        void player1LessChipsThanPlayer2_AllInCalled_Player1HasNoChipsLeftWhilePlayer2StillHasSome() {
+            fail("Player 1 has more than Player 2, all in + call," +
+                    " Player 1 has 0 chips left, Player 2 has some chips left not yet implemented");
+        }
+
+        @Test
+        @Disabled("Player 1 has more than Player 2, bet + all in + call," +
+                " both players have 0 chips left not yet implemented")
+        void player1LassChipsThanPlayer2_betAllInCalled_BothPlayersHaveNoChipsLeft() {
+            fail("Player 1 has more than Player 2, bet + all in + call," +
+                    " both players have 0 chips left not yet implemented");
+        }
+
 
 
     }
