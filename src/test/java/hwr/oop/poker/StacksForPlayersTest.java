@@ -139,8 +139,6 @@ class StacksForPlayersTest {
                     " both players have 0 chips left not yet implemented");
         }
 
-
-
     }
 
     @Nested
@@ -196,12 +194,48 @@ class StacksForPlayersTest {
         @BeforeEach
         void setUp() {
             final Deck deck = new RandomDeck();
+            final Stacks stacks = Stacks.newBuilder()
+                    .of(firstPlayer).is(100)
+                    .of(secondPlayer).is(200)
+                    .build();
+            final List<Player> players = List.of(firstPlayer, secondPlayer);
+            final SmallBlind smallBlind = SmallBlind.of(1);
             this.hand = Hand.newBuilder()
                     .deck(deck)
-                    .players(List.of(firstPlayer, secondPlayer))
-                    .smallBlind(SmallBlind.of(1))
+                    .players(players)
+                    .stacks(stacks)
+                    .smallBlind(smallBlind)
                     .build();
         }
 
+        @Test
+        void noPlay_FirstPlayerStillHas100Chips() {
+            final var stacks = hand.stacks();
+            final var firstPlayerStack = stacks.ofPlayer(firstPlayer);
+            assertThat(firstPlayerStack).isEqualTo(ChipValue.of(100));
+        }
+
+        @Test
+        void noPlay_SecondPlayerStillHas200Chips() {
+            final var stacks = hand.stacks();
+            final var secondPlayerStack = stacks.ofPlayer(secondPlayer);
+            assertThat(secondPlayerStack).isEqualTo(ChipValue.of(200));
+        }
+
+        @Test
+        void bet17Call_FirstPlayer_Has83ChipsLeft() {
+            final var updated = hand.onCurrentRound(r -> r.with(firstPlayer).bet(17).with(secondPlayer).call());
+            final var stacks = updated.stacks();
+            final ChipValue first = stacks.ofPlayer(firstPlayer);
+            assertThat(first).isEqualTo(ChipValue.of(83));
+        }
+
+        @Test
+        void bet17Call_SecondPlayer_Has183ChipsLeft() {
+            final var updated = hand.onCurrentRound(r -> r.with(firstPlayer).bet(17).with(secondPlayer).call());
+            final var stacks = updated.stacks();
+            final ChipValue second = stacks.ofPlayer(secondPlayer);
+            assertThat(second).isEqualTo(ChipValue.of(183));
+        }
     }
 }

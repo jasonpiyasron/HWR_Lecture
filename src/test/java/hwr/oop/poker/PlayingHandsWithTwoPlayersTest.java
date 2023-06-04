@@ -58,10 +58,15 @@ class PlayingHandsWithTwoPlayersTest {
         );
         firstPlayer = new Player("1");
         secondPlayer = new Player("2");
+        final Stacks stacks = Stacks.newBuilder()
+                .of(firstPlayer).is(1000)
+                .of(secondPlayer).is(1000)
+                .build();
         hand = Hand.newBuilder()
                 .deck(deck)
                 .players(List.of(firstPlayer, secondPlayer))
                 .smallBlind(SmallBlind.of(42))
+                .stacks(stacks)
                 .build();
     }
 

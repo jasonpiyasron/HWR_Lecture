@@ -10,7 +10,8 @@ import java.util.function.Function;
 public class Stacks implements Function<Player, ChipValue> {
     private final Map<Player, ChipValue> map;
 
-    public Stacks(Map<Player, ChipValue> map) {
+    private Stacks(Map<Player, ChipValue> map) {
+        assert !map.entrySet().isEmpty() && !map.containsKey(null);
         this.map = map;
     }
 

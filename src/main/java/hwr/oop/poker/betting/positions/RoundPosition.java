@@ -21,6 +21,8 @@ public interface RoundPosition extends Comparable<RoundPosition> {
 
     Optional<RoundPosition> nextPosition();
 
+    Optional<RoundPosition> previous();
+
     default void ifRequiresBurn(Runnable runnable) {
         if (shouldCauseBurn()) {
             runnable.run();

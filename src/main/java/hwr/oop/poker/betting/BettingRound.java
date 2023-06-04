@@ -14,16 +14,12 @@ public class BettingRound {
     private final List<Play> plays;
     private final Player turn;
 
-    /**
-     * @deprecated because rounds without stacks for players do not make sense!
-     */
-    @Deprecated(forRemoval = true)
-    public static BettingRound create(List<Player> players) {
-        return new BettingRound(players);
+    public static BettingRound create(Stacks stacks, Player... players) {
+        return create(stacks, Arrays.asList(players));
     }
 
-    public static BettingRound create(Stacks stackProvider, Player... players) {
-        return new BettingRound(Arrays.asList(players), stackProvider);
+    public static BettingRound create(Stacks stacks, List<Player> players) {
+        return new BettingRound(players, stacks);
     }
 
     public BettingRound(List<Player> players, Stacks stacks) {
@@ -31,14 +27,6 @@ public class BettingRound {
         this.stacks = stacks;
         this.plays = new ArrayList<>();
         this.turn = players.get(0);
-    }
-
-    /**
-     * @deprecated because rounds without stacks for players do not make sense!
-     */
-    @Deprecated(forRemoval = true)
-    private BettingRound(List<Player> players) {
-        this(players, null);
     }
 
     private BettingRound(List<Player> players, Stream<Play> plays, Player turn, Stacks stacks) {
@@ -121,6 +109,20 @@ public class BettingRound {
         );
     }
 
+    public ChipValue remainingChips(Player player) {
+        return stacks.ofPlayer(player);
+    }
+
+    public Stacks stacks() {
+        return stacks;
+    }
+
+    public Collection<Player> remainingPlayers() {
+        return players.stream()
+                .filter(this::hasPlayerNotFolded)
+                .collect(Collectors.toList());
+    }
+
     private boolean isOnlyOnePlayerRemaining() {
         final long numberOfPlayersThatHaveNotFolded = players.stream()
                 .filter(player -> playersThatHaveFolded().noneMatch(p -> p.equals(player)))
@@ -178,18 +180,8 @@ public class BettingRound {
                 .anyMatch(play -> play.playedBy(candidate));
     }
 
-    public Collection<Player> remainingPlayers() {
-        return players.stream()
-                .filter(this::hasPlayerNotFolded)
-                .collect(Collectors.toList());
-    }
-
     private boolean hasPlayerNotFolded(Player player) {
         return plays.stream().noneMatch(play -> play.playedBy(player) && play.isFold());
-    }
-
-    public ChipValue remainingChips(Player player) {
-        return stacks.ofPlayer(player);
     }
 
     public static class InvalidPlayOnStateException extends RuntimeException {

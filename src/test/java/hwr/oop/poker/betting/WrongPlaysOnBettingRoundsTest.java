@@ -1,6 +1,7 @@
 package hwr.oop.poker.betting;
 
 import hwr.oop.poker.Player;
+import hwr.oop.poker.Stacks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,12 @@ class WrongPlaysOnBettingRoundsTest {
                 secondPlayer,
                 thirdPlayer
         );
-        round = BettingRound.create(players);
+        Stacks stacks = Stacks.newBuilder()
+                .of(firstPlayer).is(100000)
+                .of(secondPlayer).is(100000)
+                .of(thirdPlayer).is(100000)
+                .build();
+        round = BettingRound.create(stacks, players);
     }
 
     @Test

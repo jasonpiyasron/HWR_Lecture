@@ -67,9 +67,9 @@ public class RoundInContext {
         if (lastIncreasingPlay.isEmpty()) {
             throw new BettingRound.InvalidPlayOnStateException("Cannot RAISE, no BET to CALL/RAISE/FOLD on");
         } else {
-            final ChipValue target = ChipValue.of(value);
-            final ChipValue previousBet = lastIncreasingPlay.get().totalChipValue();
-            final ChipValue minRaise = ChipValue.minRaise(previousBet);
+            final var target = ChipValue.of(value);
+            final var previousBet = lastIncreasingPlay.get().totalChipValue();
+            final var minRaise = ChipValue.minRaise(previousBet);
             if (target.isLessThan(minRaise)) {
                 throw new BettingRound.InvalidPlayOnStateException("Cannot RAISE, BET is 42," +
                         " expected RAISE to 82 or higher," +
@@ -81,8 +81,8 @@ public class RoundInContext {
     }
 
     public BettingRound allIn() {
-        final Optional<Play> lastIncreasingPlay = lastChipCountIncreasingPlay.get();
-        final ChipValue chipValue = remainingChipsProvider.apply(player);
+        final var lastIncreasingPlay = lastChipCountIncreasingPlay.get();
+        final var chipValue = remainingChipsProvider.apply(player);
         if (lastIncreasingPlay.isEmpty()) {
             return bet(chipValue.value());
         } else {
@@ -91,15 +91,15 @@ public class RoundInContext {
     }
 
     private Play playUsedToCall(Play bettingPlay) {
-        final ChipValue target = bettingPlay.totalChipValue();
-        final ChipValue alreadyPlayed = chipsPutIntoPotByPlayer.get();
-        final ChipValue amount = target.minus(alreadyPlayed);
+        final var target = bettingPlay.totalChipValue();
+        final var alreadyPlayed = chipsPutIntoPotByPlayer.get();
+        final var amount = target.minus(alreadyPlayed);
         return Play.call(player, target, amount);
     }
 
     private Play playUsedToGetTo(ChipValue target) {
-        final ChipValue alreadyPlayed = chipsPutIntoPotByPlayer.get();
-        final ChipValue amount = target.minus(alreadyPlayed);
+        final var alreadyPlayed = chipsPutIntoPotByPlayer.get();
+        final var amount = target.minus(alreadyPlayed);
         return Play.raiseBy(player, target, amount);
     }
 }

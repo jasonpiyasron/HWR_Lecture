@@ -22,13 +22,26 @@ public class Hand implements CommunityCardsProvider {
         return new Builder();
     }
 
-    private Hand(Deck deck, List<Player> players, SmallBlind smallBlind) {
+    private static Hand createInitially(Deck deck, List<Player> players, SmallBlind smallBlind, Stacks stacks) {
+        return new Hand(deck, players, smallBlind, stacks);
+    }
+
+    private static Hand createBasedOnOlderHand(Deck deck,
+                                               List<Player> players,
+                                               SmallBlind smallBlind,
+                                               HoleCards holeCards,
+                                               Map<RoundPosition, BettingRound> rounds,
+                                               CommunityCardsProvider communityCards) {
+        return new Hand(deck, players, smallBlind, holeCards, rounds, communityCards);
+    }
+
+    private Hand(Deck deck, List<Player> players, SmallBlind smallBlind, Stacks stacks) {
         this.deck = deck;
         this.players = players;
         this.blindConfiguration = new BlindConfiguration(smallBlind);
         this.holeCards = HoleCards.create(deck, players);
         this.communityCards = CommunityCards.empty();
-        this.rounds = Map.of(RoundPosition.PRE_FLOP, BettingRound.create(players));
+        this.rounds = Map.of(RoundPosition.PRE_FLOP, BettingRound.create(stacks, players));
     }
 
     private Hand(Deck deck,
@@ -46,9 +59,9 @@ public class Hand implements CommunityCardsProvider {
     }
 
     private CommunityCardsProvider buildCommunityCards(Deck deck, CommunityCardsProvider oldCommunityCards) {
-        Optional<RoundPosition> optional = currentPosition();
-        if (optional.isPresent()) {
-            final RoundPosition position = optional.get();
+        final var position = currentPosition();
+        final var currentRound = rounds.get(position);
+        if (!currentRound.isFinished()) {
             position.ifRequiresBurn(deck::burn);
             return position.buildCardsFor(deck, oldCommunityCards);
         } else {
@@ -121,9 +134,9 @@ public class Hand implements CommunityCardsProvider {
     }
 
     public Hand onCurrentRound(UnaryOperator<BettingRound> function) {
-        final Optional<RoundPosition> optional = currentPosition();
-        if (optional.isPresent()) {
-            final var position = optional.get();
+        final var position = currentPosition();
+        final var currentRound = rounds.get(position);
+        if (!currentRound.isFinished()) {
             final var round = roundOn(position).orElseThrow();
             return accept(function.apply(round));
         } else {
@@ -131,11 +144,26 @@ public class Hand implements CommunityCardsProvider {
         }
     }
 
+    public boolean isFinished() {
+        final var position = currentPosition();
+        final var currentRound = rounds.get(position);
+        return currentRound.isFinished();
+    }
+
+    public Stacks stacks() {
+        final var position = currentPosition();
+        final var round = rounds.get(position);
+        return round.stacks();
+    }
+
+    public RoundPosition currentPosition() {
+        return currentPosition(rounds);
+    }
+
     private Hand accept(BettingRound round) {
-        final Builder copy = copy();
-        final Optional<RoundPosition> optional = currentPosition();
-        if (optional.isPresent()) {
-            final RoundPosition position = optional.get();
+        if (!isFinished()) {
+            final var position = currentPosition();
+            final var copy = copy();
             final var unmodifiableMap = createNewMapWith(round, position);
             copy.rounds(unmodifiableMap);
             return copy.build();
@@ -145,8 +173,7 @@ public class Hand implements CommunityCardsProvider {
     }
 
     private Map<RoundPosition, BettingRound> createNewMapWith(BettingRound round, RoundPosition currentPosition) {
-        final Map<RoundPosition, BettingRound> mutableMap =
-                new HashMap<>(rounds);
+        final Map<RoundPosition, BettingRound> mutableMap = new HashMap<>(rounds);
         mutableMap.put(currentPosition, round);
         return Collections.unmodifiableMap(mutableMap);
     }
@@ -161,8 +188,8 @@ public class Hand implements CommunityCardsProvider {
                 .communityCards(communityCards);
     }
 
-    private boolean isRoundPlayed(RoundPosition preFlop) {
-        final Optional<BettingRound> optional = roundOn(preFlop);
+    private boolean isRoundPlayed(RoundPosition roundPosition) {
+        final Optional<BettingRound> optional = roundOn(roundPosition);
         return optional.isPresent() && optional.orElseThrow().isFinished();
     }
 
@@ -180,37 +207,35 @@ public class Hand implements CommunityCardsProvider {
         Map<RoundPosition, BettingRound> modifiableMap = new HashMap<>(rounds);
         final boolean riverPresentAndFinished = rounds.containsKey(RoundPosition.RIVER) && rounds.get(RoundPosition.RIVER).isFinished();
         if (!riverPresentAndFinished) {
-            final var roundPosition = currentPosition(rounds).orElseThrow();
-            final var freshBettingRound = BettingRound.create(players);
+            final var roundPosition = currentPosition(rounds);
+            final var stacksFromPreviousRound = stacksForNewRound(rounds, roundPosition);
+            final var freshBettingRound = BettingRound.create(stacksFromPreviousRound, players);
             modifiableMap.putIfAbsent(roundPosition, freshBettingRound);
         }
         return Collections.unmodifiableMap(modifiableMap);
     }
 
-    public Optional<RoundPosition> currentPosition(Map<RoundPosition, BettingRound> someRounds) {
+    private Stacks stacksForNewRound(Map<RoundPosition, BettingRound> rounds, RoundPosition roundPosition) {
+        final var previous = roundPosition.previous().orElseThrow();
+        final var round = rounds.get(previous);
+        return round.stacks();
+    }
 
-        final RoundPosition candidatePosition = someRounds.keySet().stream()
-                .reduce(RoundPosition::latest).orElseThrow();
+    private RoundPosition currentPosition(Map<RoundPosition, BettingRound> someRounds) {
+        final var candidatePosition = latestRound(someRounds);
         final BettingRound candidateRound = someRounds.get(candidatePosition);
         if (candidateRound.isFinished()) {
-            return candidatePosition.nextPosition();
+            final var nextPosition = candidatePosition.nextPosition();
+            return nextPosition.orElse(candidatePosition);  // stay on finished round (in case of river)
         } else {
-            return Optional.of(candidatePosition);
+            return candidatePosition;
         }
     }
 
-    public Optional<RoundPosition> currentPosition() {
-        return currentPosition(rounds);
-    }
-
-    public boolean isFinished() {
-        if (currentPosition().isEmpty()) {
-            return true;
-        } else {
-            final RoundPosition position = currentPosition().orElseThrow();
-            final BettingRound currentRound = rounds.get(position);
-            return currentRound.isFinished();
-        }
+    private RoundPosition latestRound(Map<RoundPosition, BettingRound> someRounds) {
+        return someRounds.keySet().stream()
+                .reduce(RoundPosition::latest)
+                .orElseThrow();
     }
 
     public static class Builder {
@@ -220,6 +245,7 @@ public class Hand implements CommunityCardsProvider {
         private HoleCards holeCards;
         private Map<RoundPosition, BettingRound> rounds;
         private CommunityCardsProvider communityCards;
+        private Stacks stacks;
 
         private Builder() {
             this.deck = null;
@@ -228,14 +254,15 @@ public class Hand implements CommunityCardsProvider {
             this.holeCards = null;
             this.communityCards = null;
             this.rounds = null;
+            this.stacks = null;
         }
 
         Hand build() {
             final boolean hasIncompleteInfo = Stream.of(holeCards, rounds, communityCards).anyMatch(Objects::isNull);
             if (hasIncompleteInfo) {
-                return new Hand(deck, players, smallBlind);
+                return Hand.createInitially(deck, players, smallBlind, stacks);
             } else {
-                return new Hand(deck, players, smallBlind, holeCards, rounds, communityCards);
+                return Hand.createBasedOnOlderHand(deck, players, smallBlind, holeCards, rounds, communityCards);
             }
         }
 
@@ -268,8 +295,14 @@ public class Hand implements CommunityCardsProvider {
             this.communityCards = communityCards;
             return this;
         }
+
+        public Builder stacks(Stacks stacks) {
+            this.stacks = stacks;
+            return this;
+        }
     }
 
-    private class PlayOnOnFinishedHandException extends RuntimeException {
+    public static class PlayOnOnFinishedHandException extends RuntimeException {
+        // nothing to do
     }
 }

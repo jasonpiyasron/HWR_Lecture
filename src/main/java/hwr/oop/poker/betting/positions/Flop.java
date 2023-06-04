@@ -31,6 +31,11 @@ class Flop implements RoundPosition {
         return Optional.of(RoundPosition.TURN);
     }
 
+    @Override
+    public Optional<RoundPosition> previous() {
+        return Optional.of(RoundPosition.PRE_FLOP);
+    }
+
 
     @Override
     public boolean equals(Object o) {

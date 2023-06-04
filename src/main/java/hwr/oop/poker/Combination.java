@@ -37,7 +37,7 @@ public class Combination {
     }
 
     private List<Card> selectNonKickerCards(List<Card> cards) {
-        MatchingStrategyFactory factory = new MatchingStrategyFactory();
+        final var factory = new MatchingStrategyFactory();
         final List<CombinationDetectionStrategy> strategies = List.of(
                 factory.createFlush(),
                 factory.createStraight(),

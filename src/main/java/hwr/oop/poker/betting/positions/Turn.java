@@ -33,6 +33,11 @@ class Turn implements RoundPosition {
     }
 
     @Override
+    public Optional<RoundPosition> previous() {
+        return Optional.of(RoundPosition.FLOP);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
