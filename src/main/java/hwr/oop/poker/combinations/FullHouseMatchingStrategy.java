@@ -35,12 +35,11 @@ class FullHouseMatchingStrategy implements CombinationDetectionStrategy {
     }
 
     private boolean isHandFullHouseBasedOnResults(Result pairResult, Result tripResult) {
-        final var moreThanOneSet = hasMultipleAlternatives(tripResult);
-        return areBothSuccessful(pairResult, tripResult) || moreThanOneSet;
+        return areBothSuccessful(pairResult, tripResult) || hasMultipleAlternatives(tripResult);
     }
 
     private boolean hasMultipleAlternatives(Result tripResult) {
-        return tripResult.alternatives().size() > 1;
+        return tripResult.successful() && tripResult.alternatives().size() > 1;
     }
 
     private boolean areBothSuccessful(Result first, Result second) {
