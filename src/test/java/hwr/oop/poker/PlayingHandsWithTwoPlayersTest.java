@@ -463,6 +463,48 @@ class PlayingHandsWithTwoPlayersTest {
         }
     }
 
+    @Nested  // TODO Write displayname!
+    class ShowDownTest {
+        private Hand finishedHand;
+
+        @BeforeEach
+        void setUp() {
+            final Hand finishedHand = hand
+                    .onCurrentRound(this::bothPlayersCheck)
+                    .onCurrentRound(this::bothPlayersCheck)
+                    .onCurrentRound(this::bothPlayersCheck)
+                    .onCurrentRound(this::bothPlayersCheck);
+            assert finishedHand.isFinished();
+            this.finishedHand = finishedHand;
+        }
+
+        @Test
+        void showDown_BothPlayers_HaveFullHouses() {
+            final Optional<ShowDown> optional = finishedHand.showDown();
+            assertThat(optional).isPresent().get().satisfies(showDown -> {
+                final Combination comboFirstPlayer = showDown.combination(firstPlayer);
+                final Combination.Label firstPlayerLabel = comboFirstPlayer.label();
+                assertThat(firstPlayerLabel).isEqualTo(Combination.Label.FULL_HOUSE);
+                final Combination comboSecondPlayer = showDown.combination(secondPlayer);
+                final Combination.Label secondPlayerLabel = comboSecondPlayer.label();
+                assertThat(secondPlayerLabel).isEqualTo(Combination.Label.FULL_HOUSE);
+            });
+        }
+
+        @Test
+        void showDown_Winner_FirstPlayer() {
+            final Optional<ShowDown> optional = finishedHand.showDown();
+            assertThat(optional).isPresent().get().satisfies(showDown -> {
+                final Player player = showDown.winner();
+                assertThat(player).isEqualTo(firstPlayer);
+            });
+        }
+
+        private BettingRound bothPlayersCheck(BettingRound r) {
+            return r.with(firstPlayer).check().with(secondPlayer).check();
+        }
+    }
+
     @Test
     @DisplayName("#potSize, is equal to sum of Small Blind and Big Blind")
     void potSize_IsEqualToSumOfSmallBlindAndBigBlind() {

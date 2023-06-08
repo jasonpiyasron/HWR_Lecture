@@ -238,6 +238,15 @@ public class Hand implements CommunityCardsProvider {
                 .orElseThrow();
     }
 
+    public Optional<ShowDown> showDown() {
+        if (isFinished()) {
+            final ShowDown showDown = ShowDown.create(communityCards, holeCards, players);
+            return Optional.of(showDown);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public static class Builder {
         private Deck deck;
         private List<Player> players;
